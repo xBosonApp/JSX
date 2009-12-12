@@ -3,6 +3,10 @@
 // v0.25
 
 
+/**
+ * 创建XMLHttpRequest对象
+ * 失败返回false
+ */
 function creatHttpRequest() {
 	var http = false;
 	
