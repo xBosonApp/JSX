@@ -1,32 +1,6 @@
 // CatfoOD 2009.11.25
 // 依赖common.js
-// v0.25
-
-
-/**
- * 创建XMLHttpRequest对象
- * 失败返回false
- */
-function creatHttpRequest() {
-	var http = false;
-	
-	if (window.XMLHttpRequest) {
-		http = new XMLHttpRequest();
-	}
-	
-	else if (window.ActiveXObject) {
-		try {
-			http = new ActiveXObject("MSXML2.XMLHttp.3.0");
-		} catch(e) {
-			try {
-				http = new ActiveXObject("Microsoft.XMLHTTP");
-			} catch(e1) {}
-		}
-	}
-	
-	return http;
-}
-
+// v0.26
 
 function ajax() {
 
@@ -64,7 +38,7 @@ function ajax() {
 			m_url = url;
 		}
 		if (m_url) {
-			xmlreq.Open(m_method, m_url, m_async);
+			xmlreq.open(m_method, m_url, m_async);
 			initheader();
 		} else {
 			showError("ajax.open() url fail");

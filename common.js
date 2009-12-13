@@ -77,3 +77,64 @@ function getFormData(formid) {
 	
 	return formtext.join('');
 }
+
+/**
+ * 创建XMLHttpRequest对象
+ * 失败返回false
+ */
+function creatHttpRequest() {
+	var http = false;
+	
+	if (window.XMLHttpRequest) {
+		http = new XMLHttpRequest();
+	}
+	
+	else if (window.ActiveXObject) {
+		try {
+			http = new ActiveXObject("MSXML2.XMLHttp.3.0");
+		} catch(e) {
+			try {
+				http = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch(e1) {}
+		}
+	}
+	
+	return http;
+}
+
+/**
+ * 包含入filename指定的文件
+ */
+function include(filename) {
+	var arrname = "com.jym.jsx.common_inlude_files";
+	if (!window[arrname]) {
+		window[arrname] = new Array();
+	}
+	
+	if (!window[arrname][filename]) {
+		
+		var request = creatHttpRequest();
+		try {
+			request.open("GET", filename, false);
+			request.send(null);
+		} catch(e) {
+			// IE8 安全错误
+		}
+		
+		if ( request.readyState==4 &&
+					(request.status==200 || request.status==0) ) {
+			
+			var jstext = request.responseText;
+			try {
+				eval(jstext);
+				window[arrname][filename] = true;
+			} catch(e) {
+				showError(e);
+			}
+			//showError("include ok");
+		}
+		else {
+			showError("cannot include file: " + filename);
+		}
+	}
+}
