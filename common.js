@@ -1,5 +1,5 @@
 // CatfoOD 2009.12.9
-// v0.13
+// v0.14
 
 /**
  * 等待id指定的标记加载结束，并执行alertfunc指定的表达式
@@ -104,6 +104,7 @@ function creatHttpRequest() {
 
 /**
  * 包含入filename指定的文件
+ * 包含文件的目录相对于html文档的目录
  */
 function include(filename) {
 	var arrname = "com.jym.jsx.common_inlude_files";
@@ -125,12 +126,8 @@ function include(filename) {
 					(request.status==200 || request.status==0) ) {
 			
 			var jstext = request.responseText;
-			try {
-				eval(jstext);
-				window[arrname][filename] = true;
-			} catch(e) {
-				showError(e);
-			}
+			window.eval(jstext);
+			window[arrname][filename] = true;
 			//showError("include ok");
 		}
 		else {
