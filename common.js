@@ -1,5 +1,6 @@
 // CatfoOD 2009.12.9
-// v0.14
+// v0.15
+
 
 /**
  * 等待id指定的标记加载结束，并执行alertfunc指定的表达式
@@ -51,11 +52,15 @@ function getByid(id) {
  */
 function showError(msg) {
 	window.status = msg;
-	var ediv = document.createElement("div");
+	var ediv = document.createElement("p");
 	ediv.style.color = "#FF0000";
 	ediv.style.fontSize = "11px";
 	ediv.innerText = msg;
-	document.body.appendChild(ediv);
+	try {
+		document.body.appendChild(ediv);	
+	} catch(e) {
+		document.body.insertAdjacentElement('afterEnd', ediv);
+	}
 }
 
 /**
@@ -63,16 +68,25 @@ function showError(msg) {
  */
 function getFormData(formid) {
 	var formtext = new Array();
-	var form = getByid(formid);
-	var inputs = form.getElementsByTagName("input");
+	var form = getByid(formid);;
 	
-	for (var i=0; i<inputs.length; ++i) {
-		formtext.push( inputs[i].name );
+	var pushvalue = function(name, value, last) {
+		formtext.push( name );
 		formtext.push( '=' );
-		formtext.push( encodeURI(inputs[i].value) );
-		if (i<inputs.length-1) {
+		formtext.push( encodeUri(value) );
+		if (!last) {
 			formtext.push( '&' );
 		}
+	}
+	
+	var inputs = form.getElementsByTagName("input");
+	for (var i=0; i<inputs.length; ++i) {
+		pushvalue(inputs[i].name, inputs[i].value);
+	}
+	
+	var selects = form.getElementsByTagName("select");
+	for (var i=0; i<selects.length; ++i) {
+		pushvalue(selects[i].name, selects[i].value);
 	}
 	
 	return formtext.join('');
@@ -134,4 +148,72 @@ function include(filename) {
 			showError("cannot include file: " + filename);
 		}
 	}
+}
+
+/**
+ * 替代encodeURIComponent编码
+ * 对中文字符不进行转换
+ */
+function encodeUri(uri) {
+	var cachename = "net.jym.js.encodeUri";
+	var signs = null;
+	if (!window[cachename]) {
+		signs = new Array();
+		signs[' '] = "%20";	
+		signs['/'] = "%2F";
+		signs['%'] = "%25";
+		signs['\\']= "%5C";
+		signs['='] = "%3D";
+		signs['&'] = "%26";
+		signs[':'] = "%3A";
+	} else {
+		signs = window[cachename];
+	}
+	
+	var newuri = new Array();
+	
+	for (var i=0; i<uri.length; ++i) {
+		var ch = uri.charAt(i);
+		if (signs[ch]) {
+			newuri.push(signs[ch]);
+		} else {
+			newuri.push(ch);
+		}
+	}
+	
+	return newuri.join('');
+}
+
+function getDiv(divid) {
+	var div = null;
+	if (typeof divid == "string") {
+		div = getByid(divid);
+	} else {
+		div = divid;
+	}
+	return div;
+}
+
+/**
+ * 显示div,参数可以是id也可以是div对象
+ */
+function showDiv(divid) {
+	var div = getDiv(divid);
+	div.style.display = "block";
+}
+
+/**
+ * 隐藏div,参数可以是id也可以是div对象
+ */
+function hideDiv(divid) {
+	var div = getDiv(divid);
+	div.style.display = "none";
+}
+
+/**
+ * 如果div已经显示返回true,否则返回false
+ */
+function divDisplay(divid) {
+	var div = getDiv(divid);
+	return div.style.display == "block";
 }

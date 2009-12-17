@@ -1,6 +1,6 @@
 // CatfoOD 2009.11.25
 // 依赖common.js
-// v0.26
+// v0.27
 
 function ajax() {
 
@@ -17,9 +17,11 @@ function ajax() {
 		}
 	}
 	
+	// 在上传的数据中增加charset字段为utf-8,以便服务端编码
 	var initheader = function() {
 		xmlreq.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
 		xmlreq.setRequestHeader('cache-control', 'no-cache');
+		xmlreq.setRequestHeader('charset', 'utf8');
 	}
 	
 	if (!xmlreq) {

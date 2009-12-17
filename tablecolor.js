@@ -61,7 +61,7 @@ function tableRowMouseOverListener(tableid, func) {
 			var row = rows[i];
 			var rowindex = i;
 			
-			row.onclick = function () {
+			row.ondblclick = function () {
 				funcstr(row, rowindex);
 			}
 		})();
