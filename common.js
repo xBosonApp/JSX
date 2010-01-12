@@ -1,12 +1,59 @@
-// CatfoOD 2009.12.9
-// v0.16
+ï»¿// CatfoOD 2009.12.9
+// charset: UTF-8
+// v0.17
 
+/*
+	----- ç›®å½• -----
+function:
+	waitTag(alertfunc, id)
+	waitBody(alertfunc)
+	moveCenter(divid)
+	getByid(id)
+	showError(msg)
+	insertDom(obj, dom)
+	getFormData(formid)
+	creatHttpRequest()
+	include(filename)
+	encodeUri(uri)
+	getDiv(divid)
+	showDiv(divid)
+	hideDiv(divid)
+	divDisplay(divid)
+	changeTableColor(tableid, fcolor, scolor, mousecolor)
+	tableRowMouseOverListener(tableid, func)
+	onMouseOverChangeColor(obj, color)
+	transitionColor(obj, scolor, ecolor)
+	changeColor(obj, color)
+	getColorInt(csscolor)
+	setX(obj, x)
+	setY(obj, y)
+	movex(obj, startx, finishx, after)
+	isie()
+	setOpacity(obj, opa)
+	
+class:
+	LockObj(obj)
+		lock()
+		check()
+		free()
+	DivPack(divid, touchid)
+		setX()
+		setY()
+		getX()
+		getY()
+		getDiv()
+	Parabola(x1, x2, y)
+		get(x);
+	Loading(obj)
+		show()
+		hide()
+*/
 
 /**
- * µÈ´ıidÖ¸¶¨µÄ±ê¼Ç¼ÓÔØ½áÊø£¬²¢Ö´ĞĞalertfuncÖ¸¶¨µÄ±í´ïÊ½
+ * ç­‰å¾…idæŒ‡å®šçš„æ ‡è®°åŠ è½½ç»“æŸï¼Œå¹¶æ‰§è¡ŒalertfuncæŒ‡å®šçš„è¡¨è¾¾å¼
  * 
- * @param alertfunc - ±í´ïÊ½×Ö·û´®£¬Í¨³£Îªº¯Êı
- * @param id - ±ê¼ÇµÄid
+ * @param alertfunc - è¡¨è¾¾å¼å­—ç¬¦ä¸²ï¼Œé€šå¸¸ä¸ºå‡½æ•°
+ * @param id - æ ‡è®°çš„id
  */
 function waitTag(alertfunc, id) {
 	var func = function() {
@@ -41,10 +88,10 @@ function waitBody(alertfunc) {
 }
 
 /**
- * ÒÆ¶¯dividÖ¸¶¨µÄ²ãµ½ÆÁÄ»µÄÖĞÑë
+ * ç§»åŠ¨dividæŒ‡å®šçš„å±‚åˆ°å±å¹•çš„ä¸­å¤®
  * 
  * @param divid
- * @return ·µ»ØdividµÄ¶ÔÏó
+ * @return è¿”å›dividçš„å¯¹è±¡
  */
 function moveCenter(divid) {
 	var div = getByid(divid);
@@ -68,23 +115,34 @@ function getByid(id) {
 }
 
 /**
- * ÏÔÊ¾Ò»¸ö´íÎóÏûÏ¢µ½×´Ì¬Ìõ£¬²¢Ìí¼Óµ½ÎÄµµÄ©Î²
+ * æ˜¾ç¤ºä¸€ä¸ªé”™è¯¯æ¶ˆæ¯åˆ°çŠ¶æ€æ¡ï¼Œå¹¶æ·»åŠ åˆ°æ–‡æ¡£æœ«å°¾
  */
 function showError(msg) {
-	window.status = msg;
+	//window.status = msg;
 	var ediv = document.createElement("div");
 	ediv.style.color = "#FF0000";
 	ediv.style.fontSize = "11px";
-	ediv.innerText = msg;
-	try {
-		document.body.appendChild(ediv);	
-	} catch(e) {
-		document.body.insertAdjacentElement('afterEnd', ediv);
+	ediv.innerHTML = '<span>' + msg + '</span>';
+	insertDom(document.body, ediv);
+}
+
+/**
+ * å‘objå¯¹è±¡çš„æœ«å°¾æ·»åŠ domå…ƒç´ 
+ */
+function insertDom(obj, dom) {
+	if (isie()) {
+		try {
+			obj.appendChild(dom);	
+		} catch(e) {
+			obj.insertAdjacentElement('afterEnd', dom);
+		}
+	} else {
+		obj.insertBefore(dom, null);
 	}
 }
 
 /**
- * ÊÕ¼¯formidµÄ±íµ¥Öµ¶Ô£¬¸ñÊ½»¯Îªx-www-form-urlencoded
+ * æ”¶é›†formidçš„è¡¨å•å€¼å¯¹ï¼Œæ ¼å¼åŒ–ä¸ºx-www-form-urlencoded
  */
 function getFormData(formid) {
 	var formtext = new Array();
@@ -116,8 +174,8 @@ function getFormData(formid) {
 }
 
 /**
- * ´´½¨XMLHttpRequest¶ÔÏó
- * Ê§°Ü·µ»Øfalse
+ * åˆ›å»ºXMLHttpRequestå¯¹è±¡
+ * å¤±è´¥è¿”å›false
  */
 function creatHttpRequest() {
 	var http = false;
@@ -140,8 +198,8 @@ function creatHttpRequest() {
 }
 
 /**
- * °üº¬ÈëfilenameÖ¸¶¨µÄÎÄ¼ş
- * °üº¬ÎÄ¼şµÄÄ¿Â¼Ïà¶ÔÓÚhtmlÎÄµµµÄÄ¿Â¼
+ * åŒ…å«å…¥filenameæŒ‡å®šçš„æ–‡ä»¶
+ * åŒ…å«æ–‡ä»¶çš„ç›®å½•ç›¸å¯¹äºhtmlæ–‡æ¡£çš„ç›®å½•
  */
 function include(filename) {
 	var arrname = "com.jym.jsx.common_inlude_files";
@@ -156,7 +214,7 @@ function include(filename) {
 			request.open("GET", filename, false);
 			request.send(null);
 		} catch(e) {
-			// IE8 °²È«´íÎó
+			// IE8 å®‰å…¨é”™è¯¯
 		}
 		
 		if ( request.readyState==4 &&
@@ -174,8 +232,8 @@ function include(filename) {
 }
 
 /**
- * Ìæ´úencodeURIComponent±àÂë
- * ¶ÔÖĞÎÄ×Ö·û²»½øĞĞ×ª»»
+ * æ›¿ä»£encodeURIComponentç¼–ç 
+ * å¯¹ä¸­æ–‡å­—ç¬¦ä¸è¿›è¡Œè½¬æ¢
  */
 function encodeUri(uri) {
 	var cachename = "net.jym.js.encodeUri";
@@ -189,6 +247,7 @@ function encodeUri(uri) {
 		signs['='] = "%3D";
 		signs['&'] = "%26";
 		signs[':'] = "%3A";
+		window[cachename] = signs;
 	} else {
 		signs = window[cachename];
 	}
@@ -218,7 +277,7 @@ function getDiv(divid) {
 }
 
 /**
- * ÏÔÊ¾div,²ÎÊı¿ÉÒÔÊÇidÒ²¿ÉÒÔÊÇdiv¶ÔÏó
+ * æ˜¾ç¤ºdiv,å‚æ•°å¯ä»¥æ˜¯idä¹Ÿå¯ä»¥æ˜¯divå¯¹è±¡
  */
 function showDiv(divid) {
 	var div = getDiv(divid);
@@ -226,12 +285,18 @@ function showDiv(divid) {
 	var strength = 20;
 	
 	var func = function() {
-		if (alpha<90) {
-			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
-					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=200);";
+		if (alpha<100) {
+			if (isie()) {
+				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
+						+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=200);";
+			} else {
+				setOpacity(div, alpha);
+			}
 			setTimeout(func, 20);
 			alpha += 8;
 			strength-=2;
+		} else {
+			div.style.filter = null;
 		}
 	}
 	func();
@@ -239,7 +304,7 @@ function showDiv(divid) {
 }
 
 /**
- * Òş²Ødiv,²ÎÊı¿ÉÒÔÊÇidÒ²¿ÉÒÔÊÇdiv¶ÔÏó
+ * éšè—div,å‚æ•°å¯ä»¥æ˜¯idä¹Ÿå¯ä»¥æ˜¯divå¯¹è±¡
  */
 function hideDiv(divid) {
 	var div = getDiv(divid);
@@ -248,8 +313,12 @@ function hideDiv(divid) {
 	
 	var func = function() {
 		if (alpha>0) {
-			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
-					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=35);";
+			if (isie()) {
+				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
+						+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=35);";
+			} else {
+				setOpacity(div, alpha);
+			}
 			setTimeout(func, 20);
 			alpha -= 8;
 			strength+=2;
@@ -261,7 +330,7 @@ function hideDiv(divid) {
 }
 
 /**
- * Èç¹ûdivÒÑ¾­ÏÔÊ¾·µ»Øtrue,·ñÔò·µ»Øfalse
+ * å¦‚æœdivå·²ç»æ˜¾ç¤ºè¿”å›true,å¦åˆ™è¿”å›false
  */
 function divDisplay(divid) {
 	var div = getDiv(divid);
@@ -270,13 +339,13 @@ function divDisplay(divid) {
 
 
 /**
- * ĞŞ¸ÄtableidÖ¸¶¨µÄ±íµÄÑÕÉ«£¬ÆäÑÕÉ«Îª¸ôĞĞÏÔÊ¾
+ * ä¿®æ”¹tableidæŒ‡å®šçš„è¡¨çš„é¢œè‰²ï¼Œå…¶é¢œè‰²ä¸ºéš”è¡Œæ˜¾ç¤º
  * 
- * @param tableid - ±í¸ñµÄid
- * @param fcolor - ÆæÊıĞĞµÄÑÕÉ«
- * @param scolor - Å¼ÊıĞĞµÄÑÕÉ«
- * @param mousecolor - Êó±êĞüÍ£µÄÑÕÉ«
- * @return ·µ»ØtableidµÄ¶ÔÏó
+ * @param tableid - è¡¨æ ¼çš„id
+ * @param fcolor - å¥‡æ•°è¡Œçš„é¢œè‰²
+ * @param scolor - å¶æ•°è¡Œçš„é¢œè‰²
+ * @param mousecolor - é¼ æ ‡æ‚¬åœçš„é¢œè‰²
+ * @return è¿”å›tableidçš„å¯¹è±¡
  */
 function changeTableColor(tableid, fcolor, scolor, mousecolor) {
 	var table = getByid(tableid);
@@ -312,12 +381,12 @@ function changeTableColor(tableid, fcolor, scolor, mousecolor) {
 }
 
 /**
- * ±í¸ñĞĞÊó±êµã»÷ÊÂ¼ş
+ * è¡¨æ ¼è¡Œé¼ æ ‡ç‚¹å‡»äº‹ä»¶
  * 
- * @param tableid - Òª¼àÌıµÄ±í¸ñid
- * @param func - ¼àÌıº¯Êı,µÚÒ»¸ö²ÎÊıÎªµ±Ç°Êó±êĞüÍ£µÄtr¶ÔÏó,
- * 						µÚ¶ş¸ö²ÎÊıÊÇµ±Ç°ĞĞµÄË÷Òı´Ó0¿ªÊ¼
- * @return ·µ»ØtableidµÄ¶ÔÏó
+ * @param tableid - è¦ç›‘å¬çš„è¡¨æ ¼id
+ * @param func - ç›‘å¬å‡½æ•°,ç¬¬ä¸€ä¸ªå‚æ•°ä¸ºå½“å‰é¼ æ ‡æ‚¬åœçš„trå¯¹è±¡,
+ * 						ç¬¬äºŒä¸ªå‚æ•°æ˜¯å½“å‰è¡Œçš„ç´¢å¼•ä»0å¼€å§‹
+ * @return è¿”å›tableidçš„å¯¹è±¡
  */
 function tableRowMouseOverListener(tableid, func) {
 	var table = getByid(tableid);
@@ -340,17 +409,15 @@ function tableRowMouseOverListener(tableid, func) {
 }
 
 /**
- * µ±Êó±êĞüÍ£ÔÚobj±ê¼ÇÉÏÊ±£¬ÑÕÉ«±äÎªcolor
+ * å½“é¼ æ ‡æ‚¬åœåœ¨objæ ‡è®°ä¸Šæ—¶ï¼Œé¢œè‰²å˜ä¸ºcolor
  * 
- * @param obj - html±ê¼Ç¶ÔÏó
- * @param color - ÓĞĞ§µÄcssÑÕÉ«Öµ
+ * @param obj - htmlæ ‡è®°å¯¹è±¡
+ * @param color - æœ‰æ•ˆçš„cssé¢œè‰²å€¼
  * @return null
  */
 function onMouseOverChangeColor(obj, color) {
 	var oldcolor = getColorInt(obj.style.backgroundColor);
 	var ncolor = getColorInt(color);
-	
-	var lock = new LockObj(obj);
 	
 	obj.onmouseover = function() {
 		if (oldcolor) {
@@ -369,7 +436,7 @@ function onMouseOverChangeColor(obj, color) {
 }
 
 /**
- * objµÄÑÕÉ«ÓÉscolor±äÎªecolor, ÑÕÉ«ÖµÎªÕûÊı 
+ * objçš„é¢œè‰²ç”±scolorå˜ä¸ºecolor, é¢œè‰²å€¼ä¸ºæ•´æ•° 
  */
 function transitionColor(obj, scolor, ecolor) {
 	var count = 15;
@@ -405,7 +472,7 @@ function transitionColor(obj, scolor, ecolor) {
 }
 
 /**
- * Ïß³ÌËø¶ÔÏó£¬ÔÚobj¶ÔÏóÉÏÌí¼ÓËø
+ * çº¿ç¨‹é”å¯¹è±¡ï¼Œåœ¨objå¯¹è±¡ä¸Šæ·»åŠ é”
  */
 function LockObj(obj) {
 	var lockname = "jym_jsx_thread_lock_object";
@@ -415,10 +482,10 @@ function LockObj(obj) {
 	}
 	
 	/**
-	 * ÔÚ¶ÔÏóÉÏ¼ÓËø£¬Èç¹û¶ÔÏóÒÑ¾­±»ÆäËûÏß³ÌËø¶¨£¬
-	 * ÔòĞèÒªµÈ´ı£¬Ëø±»ÊÍ·Å²ÅÄÜ¼ÌĞøÖ´ĞĞ
+	 * åœ¨å¯¹è±¡ä¸ŠåŠ é”ï¼Œå¦‚æœå¯¹è±¡å·²ç»è¢«å…¶ä»–çº¿ç¨‹é”å®šï¼Œ
+	 * åˆ™éœ€è¦ç­‰å¾…ï¼Œé”è¢«é‡Šæ”¾æ‰èƒ½ç»§ç»­æ‰§è¡Œ
 	 *
-	 * @parm func - Ëø±»ÊÍ·Åºó£¬Ö´ĞĞµÄ·½·¨
+	 * @parm func - é”è¢«é‡Šæ”¾åï¼Œæ‰§è¡Œçš„æ–¹æ³•
 	 */
 	this.lock = function(func) {
 		if (typeof func==='function') {
@@ -435,8 +502,8 @@ function LockObj(obj) {
 	}
 	
 	/**
-	 * Èç¹û¶ÔÏóÃ»ÓĞ±»Ëø¶¨£¬Ö´ĞĞfuncº¯Êı
-	 * ·ñÔòºöÂÔ
+	 * å¦‚æœå¯¹è±¡æ²¡æœ‰è¢«é”å®šï¼Œæ‰§è¡Œfuncå‡½æ•°
+	 * å¦åˆ™å¿½ç•¥
 	 */
 	this.check = function(func) {
 		if (typeof func==='function') {
@@ -448,7 +515,7 @@ function LockObj(obj) {
 	}
 	
 	/**
-	 * ÊÍ·Å¶ÔÏóÉÏµÄËø
+	 * é‡Šæ”¾å¯¹è±¡ä¸Šçš„é”
 	 */
 	this.free = function() {
 		obj[lockname]--;
@@ -457,7 +524,7 @@ function LockObj(obj) {
 }
 
 /**
- * cssÑÕÉ«¸ñÊ½('#000000')×ª»»ÎªÕûÊı£¬²¢·µ»Ø
+ * cssé¢œè‰²æ ¼å¼('#000000')è½¬æ¢ä¸ºæ•´æ•°ï¼Œå¹¶è¿”å›
  */
 function getColorInt(csscolor) {
 	if (csscolor) {
@@ -468,19 +535,19 @@ function getColorInt(csscolor) {
 }
 
 /**
- * ĞŞ¸ÄobjµÄÑÕÉ«Îªcolor
+ * ä¿®æ”¹objçš„é¢œè‰²ä¸ºcolor
  * 
- * @param obj - html±ê¼Ç¶ÔÏó
- * @param color - ÓĞĞ§µÄcssÑÕÉ«Öµ, Èç¹ûcolorÎªÕûÊı×Ô¶¯¸ñÊ½»¯Îªcss¸ñÊ½
- *					Èç¹ûcolor===false, Ôò¶ÔÏó±äÎªÍ¸Ã÷±³¾°
+ * @param obj - htmlæ ‡è®°å¯¹è±¡
+ * @param color - æœ‰æ•ˆçš„cssé¢œè‰²å€¼, å¦‚æœcolorä¸ºæ•´æ•°è‡ªåŠ¨æ ¼å¼åŒ–ä¸ºcssæ ¼å¼
+ *					å¦‚æœcolor===false, åˆ™å¯¹è±¡å˜ä¸ºé€æ˜èƒŒæ™¯
  * @return null
  */
 function changeColor(obj, color) {
 	if (color===false) {
 		obj.style.backgroundColor = '';
 	}
-	else if (isNaN(obj)) {
-		obj.style.backgroundColor = color;
+	else if (isNaN(color)) {
+		obj.style.backgroundColor = color
 	} else {
 		var c = new Number(color).toString(16);
 		obj.style.backgroundColor = '#'+c;
@@ -489,13 +556,13 @@ function changeColor(obj, color) {
 
 
 /**
- * ¶Ôdiv±êÇ©µÄ·â×°Àà£¬ÈÃdividÖ¸¶¨µÄdiv¿ÉÒÔ±»Êó±êÍÏ¶¯
+ * å¯¹divæ ‡ç­¾çš„å°è£…ç±»ï¼Œè®©dividæŒ‡å®šçš„divå¯ä»¥è¢«é¼ æ ‡æ‹–åŠ¨
  * @author CatfoOD 2009
  * 
- * @param divid - Ä¿±êdivid
- * @param touchid - ´¥·¢Êó±êÊÂ¼şµÄ¶ÔÏóµÄid,Èç¹ûÎªnull,Ôòdiv²»¿ÉÓÃÊó±êÍÏ¶¯
- * 					Èç¹ûtouchid²»Îªnull²¢ÇÒÖ¸¶¨µÄ¶ÔÏóÎŞĞ§£¬
- * 					ÔòÊ¹ÓÃdiv×Ô¼º´¥·¢Êó±êÍÏ¶¯ÊÂ¼ş
+ * @param divid - ç›®æ ‡divid
+ * @param touchid - è§¦å‘é¼ æ ‡äº‹ä»¶çš„å¯¹è±¡çš„id,å¦‚æœä¸ºnull,åˆ™divä¸å¯ç”¨é¼ æ ‡æ‹–åŠ¨
+ * 					å¦‚æœtouchidä¸ä¸ºnullå¹¶ä¸”æŒ‡å®šçš„å¯¹è±¡æ— æ•ˆï¼Œ
+ * 					åˆ™ä½¿ç”¨divè‡ªå·±è§¦å‘é¼ æ ‡æ‹–åŠ¨äº‹ä»¶
  */
 function DivPack(divid, touchid) {
 	var div = document.getElementById(divid);
@@ -509,12 +576,12 @@ function DivPack(divid, touchid) {
 	
 	this.setX = function(nx) {
 		x = nx;
-		div.style.left = x;
+		setX(div, x);
 	}
 	
 	this.setY = function(ny) {
 		y = ny;
-		div.style.top = y;
+		setY(div, y);
 	}
 	
 	this.getX = function() {
@@ -563,5 +630,153 @@ function DivPack(divid, touchid) {
 		toucher.onmouseup = cancelmove;
 		
 		div.style.position = "absolute";
+	}
+}
+
+function setX(obj, x) {
+	obj.style.left = x + 'px';
+}
+
+function setY(obj, y) {
+	obj.style.top = parseInt(y) +  'px';
+}
+
+/**
+ * ç§»åŠ¨objå¯¹è±¡,ä»startxåˆ°finishx, ç§»åŠ¨å®Œæˆåè°ƒç”¨after()
+ */
+function movex(obj, startx, finishx, after) {
+	var func = false;
+	var size = Math.max(finishx,startx)-Math.min(finishx,startx);
+	var count = size/40;
+	var f = startx<finishx ? 1 : -1;
+	
+	func = function() {
+		if ( f*startx < f*finishx ) {
+			count += 10;
+			s = size/count;
+			var step = 0.335 * s*s + 1;
+			startx += (f*step);
+			setX(obj, startx);
+			setTimeout(func, 20);
+		} else {
+			setX(obj, finishx);
+			if (after) after();
+		}
+	}
+	
+	func();
+}
+
+function isie() {
+	var name = 'jym.jsx.iename.cache';
+	if (!window[name]) {
+		 window[name] = navigator.appName.search('Microsoft');
+	}
+	return window[name]>=0;
+}
+
+/**
+ * è®¾ç½®objçš„é€æ˜åº¦ä¸ºopa(0-100)
+ */
+function setOpacity(obj, opa) {
+	if (obj.filters) {
+		obj.style.filters = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+opa+')';
+	} else {
+		obj.style.opacity = opa/100;
+	}
+}
+
+/**
+ * æŠ›ç‰©çº¿å‡½æ•°,x1-èµ·å§‹,x2-ç»“æŸ,y-get()è¿”å›çš„æœ€å¤§å€¼
+ */
+function Parabola(x1, x2, y) {
+	var w, p, my, sx;
+	
+	if (x1<x2) {
+		w = Math.abs( (x2-x1)/2 );
+		sx = x1;
+	} else {
+		w = Math.abs( (x1-x2)/2 );
+		sx = x2;
+	}
+	my = y;
+	p = (w*w) / -my;
+	
+	/**
+	 * x1<x<x2
+	 */
+	this.get = function(x) {
+		x = x-sx-w;
+		return x*x / p+my;
+	}
+}
+
+/**
+ * åœ¨objå¯¹è±¡ä¸­é—´æ˜¾ç¤ºè¯»å–è¿›åº¦æ¡
+ */
+function Loading(obj) {
+	
+	var ox = obj.offsetLeft;
+	var oy = obj.offsetTop;
+	var ow = obj.clientWidth;
+	var oh = obj.clientHeight;
+	var name = 'jym.jsx.loading.cache';
+	var div = window[name];
+	var runing = false;
+	var text = 'Loading ...';
+	
+	if (!div) {
+		div = window[name] = createDiv();
+	}
+	
+	function createDiv() {
+		var w = 200;
+		var h = 22;
+		var x = (ow-w)/2 + ox;
+		var y = (oh-h)/2 + oy;
+		
+		var ediv = document.createElement("div");
+		ediv.style.backgroundColor = '#ffffff';
+		ediv.style.color 		= "#000000";
+		ediv.style.fontFamily	= "é»‘ä½“";
+		ediv.style.fontSize 	= "12px";
+		ediv.style.position 	= "absolute";
+		ediv.style.left 		= x + 'px';
+		ediv.style.top 			= y + 'px';
+		ediv.style.width 		= w + 'px';
+		ediv.style.height		= h + 'px';
+		ediv.style.paddingTop	= '7px';
+		ediv.style.zIndex		= '2000';
+		ediv.style.display = 'none';
+		ediv.align = 'center';
+		ediv.innerHTML = '<span>Loading ...</span>';
+		
+		insertDom(document.body, ediv);
+		
+		return ediv;
+	}
+	
+	var i = 0;
+	function textd() {
+		var str = text.substr(0, i) + '&nbsp;' + text.substr(i+1);
+		div.innerHTML = str;
+		if (++i >= text.length) i=0;
+		
+		if (runing) {
+			setTimeout(textd, 100);
+		}
+	}
+	
+	this.show = function() {
+		runing = true;
+		textd();
+		showDiv(div);
+	}
+	
+	this.hide = function() {
+		hideDiv(div);
+		setTimeout( function() {
+			runing = false;
+		}, 500);
 	}
 }

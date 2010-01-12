@@ -1,6 +1,7 @@
-// CatfoOD 2009.11.25
-// ÒÀÀµcommon.js
-// v0.27
+ï»¿// CatfoOD 2009.11.25
+// ä¾èµ–common.js
+// charset: UTF-8
+// v0.28
 
 function ajax() {
 
@@ -17,7 +18,7 @@ function ajax() {
 		}
 	}
 	
-	// ÔÚÉÏ´«µÄÊı¾İÖĞÔö¼Ócharset×Ö¶ÎÎªutf-8,ÒÔ±ã·şÎñ¶Ë±àÂë
+	// åœ¨ä¸Šä¼ çš„æ•°æ®ä¸­å¢åŠ charsetå­—æ®µä¸ºutf-8,ä»¥ä¾¿æœåŠ¡ç«¯ç¼–ç 
 	var initheader = function() {
 		xmlreq.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
 		xmlreq.setRequestHeader('cache-control', 'no-cache');
@@ -33,11 +34,14 @@ function ajax() {
 	
 	
 	/**
-	 * ´ò¿ªÇëÇó
+	 * æ‰“å¼€è¯·æ±‚
 	 */
 	this.open = function(url) {
 		if (url) {
 			m_url = url;
+		}
+	if (!isie) {
+		m_async = false;
 		}
 		if (m_url) {
 			xmlreq.open(m_method, m_url, m_async);
@@ -48,7 +52,7 @@ function ajax() {
 	}
 	
 	/**
-	 * ÓÃpost´ò¿ªÇëÇóµÄurl
+	 * ç”¨postæ‰“å¼€è¯·æ±‚çš„url
 	 */
 	this.post = function(url) {
 		this.setMethod("POST");
@@ -56,7 +60,7 @@ function ajax() {
 	}
 	
 	/**
-	 * ÓÃget´ò¿ªÇëÇóµÄurl
+	 * ç”¨getæ‰“å¼€è¯·æ±‚çš„url
 	 */
 	this.get = function(url) {
 		this.setMethod("GET");
@@ -64,29 +68,32 @@ function ajax() {
 	}
 	
 	/**
-	 * ·¢ËÍÇëÇó
+	 * å‘é€è¯·æ±‚
 	 */
 	this.send = function(content) {
 		if (!content) content = null;
 		xmlreq.send(content);
+	if (!isie()) {
+		eventheadle();
+		}
 	}
 	
 	/**
-	 * ÖĞ¶ÏÇëÇó
+	 * ä¸­æ–­è¯·æ±‚
 	 */
 	this.abort = function() {
 		xmlreq.abort();
 	}
 	
 	/**
-	 * ÉèÖÃÇëÇóµÄ·½·¨£¬post;get;...
+	 * è®¾ç½®è¯·æ±‚çš„æ–¹æ³•ï¼Œpost;get;...
 	 */
 	this.setMethod = function(method) {
 		m_method = method;
 	}
 	
 	/**
-	 * ÉèÖÃÎªpost·½·¨£¬²¢¸üĞÂÉÏ´«µÄÄÚÈİÀàĞÍÎªform
+	 * è®¾ç½®ä¸ºpostæ–¹æ³•ï¼Œå¹¶æ›´æ–°ä¸Šä¼ çš„å†…å®¹ç±»å‹ä¸ºform
 	 */
 	this.setPostMethod = function() {
 		m_method = "POST";
@@ -109,12 +116,12 @@ function ajax() {
 	}
 	
 	/**
-	 * Ìí¼ÓÊÂ¼şĞŞ¸Ä´¦Àí¾ä±ú£¬¾ä±úº¯Êı¸ñÊ½£º
+	 * æ·»åŠ äº‹ä»¶ä¿®æ”¹å¤„ç†å¥æŸ„ï¼Œå¥æŸ„å‡½æ•°æ ¼å¼ï¼š
 	 * headle(readyState, status, xmlobj);
 	 *
-	 * readyState - ajax×´Ì¬Âë
-	 * status - ·µ»ØµÄhttp×´Ì¬Âë
-	 * xmlobj - XMLHttpRequest¶ÔÏó
+	 * readyState - ajaxçŠ¶æ€ç 
+	 * status - è¿”å›çš„httpçŠ¶æ€ç 
+	 * xmlobj - XMLHttpRequestå¯¹è±¡
 	 */
 	this.setListener = function(headle) {
 		m_headles.push( function() {
@@ -123,11 +130,11 @@ function ajax() {
 	}
 	
 	/**
-	 * Ìí¼ÓÊÂ¼ş´¦Àí¾ä±ú£¬¾ä±úº¯Êı¸ñÊ½£º
+	 * æ·»åŠ äº‹ä»¶å¤„ç†å¥æŸ„ï¼Œå¥æŸ„å‡½æ•°æ ¼å¼ï¼š
 	 * headle(xmlobj);
-	 * µ±readyState==4£¬ status==200Ê±±»µ÷ÓÃ
+	 * å½“readyState==4ï¼Œ status==200æ—¶è¢«è°ƒç”¨
 	 *
-	 * xmlobj - XMLHttpRequest¶ÔÏó
+	 * xmlobj - XMLHttpRequestå¯¹è±¡
 	 */
 	this.setOkListener = function(headle) {
 		m_headles.push( function() {
@@ -139,10 +146,10 @@ function ajax() {
 	}
 	
 	/**
-	 * Ìí¼ÓÎÄ±¾½ÓÊÕ¾ä±ú£¬¾ä±ú¸ñÊ½£º
+	 * æ·»åŠ æ–‡æœ¬æ¥æ”¶å¥æŸ„ï¼Œå¥æŸ„æ ¼å¼ï¼š
 	 * headle(text);
 	 * 
-	 * text - Ó¦´ğ·µ»ØµÄÎÄ±¾
+	 * text - åº”ç­”è¿”å›çš„æ–‡æœ¬
 	 */
 	this.setTextListener = function(headle) {
 		this.setOkListener( function(_xmlreq) {
@@ -151,10 +158,10 @@ function ajax() {
 	}
 	
 	/**
-	 * Ìí¼Óxml½ÓÊÕ¾ä±ú£¬¾ä±ú¸ñÊ½£º
+	 * æ·»åŠ xmlæ¥æ”¶å¥æŸ„ï¼Œå¥æŸ„æ ¼å¼ï¼š
 	 * headle(xml);
 	 * 
-	 * xml - Ó¦´ğ·µ»ØµÄxml¶ÔÏó
+	 * xml - åº”ç­”è¿”å›çš„xmlå¯¹è±¡
 	 */
 	this.setXmlListener = function(headle) {
 		this.setOkListener( function(_xmlreq) {
@@ -163,34 +170,34 @@ function ajax() {
 	}
 	
 	/**
-	 * Ìí¼Ó´íÎó´¦Àí¾ä±ú£¬¾ä±úº¯Êı¸ñÊ½£º
+	 * æ·»åŠ é”™è¯¯å¤„ç†å¥æŸ„ï¼Œå¥æŸ„å‡½æ•°æ ¼å¼ï¼š
 	 * headle(errmsg, status, xmlobj);
 	 *
-	 * errmsg - ´íÎóµÄÖĞÎÄÏûÏ¢
-	 * status - ·µ»ØµÄhttp×´Ì¬Âë
-	 * xmlobj - XMLHttpRequest¶ÔÏó
+	 * errmsg - é”™è¯¯çš„ä¸­æ–‡æ¶ˆæ¯
+	 * status - è¿”å›çš„httpçŠ¶æ€ç 
+	 * xmlobj - XMLHttpRequestå¯¹è±¡
 	 */
 	this.setErrorListener = function(headle) {
 		m_headles.push( function() {
 			if ( xmlreq.readyState==4 &&
 					(xmlreq.status!=200 && xmlreq.status!=0) ) {
-				var errmsg = "Î´Öª´íÎó";
+				var errmsg = "æœªçŸ¥é”™è¯¯";
 				switch (xmlreq.status) {
-					case 204: errmsg="ÎŞÄÚÈİ";
+					case 204: errmsg="æ— å†…å®¹";
 						break;
-					case 400: errmsg="ÇëÇó´íÎó";
+					case 400: errmsg="è¯·æ±‚é”™è¯¯";
 						break;
-					case 403: errmsg="½ûÖ¹·ÃÎÊ";
+					case 403: errmsg="ç¦æ­¢è®¿é—®";
 						break;
-					case 404: errmsg="ÎÄ¼şÎ´ÕÒµ½";
+					case 404: errmsg="æ–‡ä»¶æœªæ‰¾åˆ°";
 						break;
-					case 408: errmsg="ÇëÇó³¬Ê±";
+					case 408: errmsg="è¯·æ±‚è¶…æ—¶";
 						break;
-					case 500: errmsg="·şÎñÆ÷´íÎó";
+					case 500: errmsg="æœåŠ¡å™¨é”™è¯¯";
 						break;
-					case 501: errmsg="Î´ÊµÏÖ";
+					case 501: errmsg="æœªå®ç°";
 						break;
-					case 505: errmsg="Http°æ±¾²»Ö§³Ö";
+					case 505: errmsg="Httpç‰ˆæœ¬ä¸æ”¯æŒ";
 						break;
 				}
 				headle( errmsg, xmlreq.status, xmlreq );
@@ -199,7 +206,7 @@ function ajax() {
 	}
 	
 	/**
-	 * ÒÆ³ıÈ«²¿ÊÂ¼ş¼àÌıÆ÷
+	 * ç§»é™¤å…¨éƒ¨äº‹ä»¶ç›‘å¬å™¨
 	 */
 	this.clearListener = function() {
 		m_headles = new Array();
@@ -217,11 +224,11 @@ function ajax() {
 	
 	/**
 	 * readyState:
-	 * 0: Î´³õÊ¼»¯
-	 * 1: ÕıÔÚ¼ÓÔØ
-	 * 2: ÒÑ¼ÓÔØ
-	 * 3: ½»»¥
-	 * 4: Íê³É
+	 * 0: æœªåˆå§‹åŒ–
+	 * 1: æ­£åœ¨åŠ è½½
+	 * 2: å·²åŠ è½½
+	 * 3: äº¤äº’
+	 * 4: å®Œæˆ
 	 */
 	this.getReadyState = function() {
 		return xmlreq.readyState;

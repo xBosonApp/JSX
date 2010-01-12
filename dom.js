@@ -1,5 +1,6 @@
-// CatfoOD 2009.12.9
-// v0.1
+﻿// CatfoOD 2009.12.9
+// charset: UTF-8
+// v0.11
 
 function Dom(xml) {
 	
@@ -18,8 +19,8 @@ function Dom(xml) {
 	}
 	
 	/**
-	 * ��·��ȡ�ýڵ�
-	 * ·��ʹ��'.'�ָ��������ڷ���null
+	 * 沿路径取得节点
+	 * 路径使用'.'分割，如果不存在返回null
 	 */
 	this.getNode = function(path) {
 		var elems = path.split('.');
@@ -33,8 +34,8 @@ function Dom(xml) {
 	}
 	
 	/**
-	 * ��·��ȡ�ýڵ��ֵ��ֵ����Դ����������ֵ���ı��ڵ�ֵ
-	 * ·��ʹ��'.'�ָ��������ڷ���null
+	 * 沿路径取得节点的值，值的来源可以是属性值或文本节点值
+	 * 路径使用'.'分割，如果不存在返回null
 	 */
 	this.getValue = function(path) {
 		var node = this.getNode(path);
