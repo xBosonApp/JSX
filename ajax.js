@@ -32,7 +32,6 @@ function ajax() {
 		xmlreq.onreadystatechange = eventheadle;
 	}
 	
-	
 	/**
 	 * 打开请求
 	 */
@@ -182,6 +181,7 @@ function ajax() {
 			if ( xmlreq.readyState==4 &&
 					(xmlreq.status!=200 && xmlreq.status!=0) ) {
 				var errmsg = "未知错误";
+				
 				switch (xmlreq.status) {
 					case 204: errmsg="无内容";
 						break;

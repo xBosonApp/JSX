@@ -49,6 +49,21 @@ class:
 		hide()
 */
 
+(function() {
+	var head = document.getElementsByTagName("head")[0];
+	var srps = head.getElementsByTagName("script");
+	for (var i=0; i<srps.length; ++i) {
+		var index = srps[i].src.indexOf("JSX/common.js");
+		
+		if (index>=0) {
+			path = srps[i].src.substring(0, index);
+			path = path + "JSX/"
+			include(path + "ajax.js");
+			include(path + "dom.js");
+		}
+	}
+})();
+
 /**
  * 等待id指定的标记加载结束，并执行alertfunc指定的表达式
  * 
@@ -142,6 +157,37 @@ function insertDom(obj, dom) {
 }
 
 /**
+ * 包含入filename指定的js脚本文件<br>
+ * 包含文件的目录相对于html文档的目录,或'/'开始相对网站目录<br>
+ * 
+ * 包含的脚本在body加载完毕后可用<br>
+ */
+function include(filename) {
+	var head = document.getElementsByTagName("head")[0];
+	var script = document.createElement("script");
+	script.src = filename;
+	script.type= "text/javascript";
+
+	insertDom(head, script);
+}
+
+/**
+ * 包含入filename指定的样式表文件<br>
+ * 包含文件的目录相对于html文档的目录,或'/'开始相对网站目录<br>
+ * 
+ * 包含的脚本在body加载完毕后可用<br>
+ */
+function includecss(cssfilename) {
+	var head = document.getElementsByTagName("head")[0];
+	var css = document.createElement("link");
+	css.rel = "stylesheet";
+	css.type = "text/css";
+	css.href = cssfilename;
+	
+	insertDom(head, css);
+}
+
+/**
  * 收集formid的表单值对，格式化为x-www-form-urlencoded
  */
 function getFormData(formid) {
@@ -195,40 +241,6 @@ function creatHttpRequest() {
 	}
 	
 	return http;
-}
-
-/**
- * 包含入filename指定的文件
- * 包含文件的目录相对于html文档的目录
- */
-function include(filename) {
-	var arrname = "com.jym.jsx.common_inlude_files";
-	if (!window[arrname]) {
-		window[arrname] = new Array();
-	}
-	
-	if (!window[arrname][filename]) {
-		
-		var request = creatHttpRequest();
-		try {
-			request.open("GET", filename, false);
-			request.send(null);
-		} catch(e) {
-			// IE8 安全错误
-		}
-		
-		if ( request.readyState==4 &&
-					(request.status==200 || request.status==0) ) {
-			
-			var jstext = request.responseText;
-			window.eval(jstext);
-			window[arrname][filename] = true;
-			//showError("include ok");
-		}
-		else {
-			showError("cannot include file: " + filename);
-		}
-	}
 }
 
 /**
