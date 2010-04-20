@@ -169,6 +169,24 @@ function ajax() {
 	}
 	
 	/**
+	 * 添加json接收句柄，句柄格式：
+	 * headle(json);
+	 * 
+	 * json - 应答返回的json对象
+	 */
+	this.setJSonListener = function(headle) {
+		this.setTextListener( function(text) {
+			var json = "";
+			try {
+				json = eval( '(' + text + ')' );
+			} catch (e) {
+				showError("json 字符串无效:" + e.message +":"+ text);
+			}
+			headle(json);
+		} );
+	}
+	
+	/**
 	 * 添加错误处理句柄，句柄函数格式：
 	 * headle(errmsg, status, xmlobj);
 	 *
