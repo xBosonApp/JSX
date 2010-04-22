@@ -43,10 +43,11 @@ class:
 		getY()
 		getDiv()
 	Parabola(x1, x2, y)
-		get(x);
-	Loading(obj)
+		get(x)
+	Dialog(w,h)
 		show()
-		hide()
+		close()
+		setHtml(html)
 */
 
 (function() {
@@ -578,6 +579,7 @@ function changeColor(obj, color) {
  */
 function DivPack(divid, touchid) {
 	var div = document.getElementById(divid);
+	if (div==null) div = divid;
 
 	var x = 0;
 	var y = 0;
@@ -691,8 +693,8 @@ function isie() {
  * 设置obj的透明度为opa(0-100)
  */
 function setOpacity(obj, opa) {
-	if (obj.filters) {
-		obj.style.filters = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+opa+')';
+	if (isie()) {
+		obj.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+opa+');';
 	} else {
 		obj.style.opacity = opa/100;
 	}
@@ -723,72 +725,69 @@ function Parabola(x1, x2, y) {
 	}
 }
 
-/**
- * 在obj对象中间显示读取进度条
- */
-function Loading(obj) {
-	
+/** 显示对话框 */
+function Dialog(width, height) {
+	var obj = document.body;
 	var ox = obj.offsetLeft;
 	var oy = obj.offsetTop;
 	var ow = obj.clientWidth;
 	var oh = obj.clientHeight;
-	var name = 'jym.jsx.loading.cache';
-	var div = window[name];
-	var runing = false;
-	var text = 'Loading ...';
 	
-	if (!div) {
-		div = window[name] = createDiv();
+	var hide = createDiv(ow, oh, '#555', 50);
+	var div = createDiv(width, height);
+	
+	/** 显示对话框 */
+	this.show = function() {
+		hide.style.display = "block";
+		showDiv(div);
 	}
 	
-	function createDiv() {
-		var w = 200;
-		var h = 22;
+	/** 关闭对话框 */
+	this.close = function() {
+		hide.style.display = "none";
+		hideDiv(div);
+	}
+	
+	/** 设置内容为html */
+	this.setHtml = function(html) {
+		div.innerHTML = html;
+		// 自动调整大小
+		div.style.height = div.scrollHeight;
+	}
+	
+	this.getContentDiv = function() {
+		return div;
+	}
+
+	window.onresize = function() {
+		var bw = document.body.clientWidth;
+		var bh = document.body.clientHeight;
+		var sw = document.body.scrollWidth;
+		var sh = document.body.scrollHeight;
+		hide.style.width 	= (bw>sw)?bw:sw + 'px';
+		hide.style.height	= (bh>sh)?bh:sh + 'px';
+	}
+	
+	function createDiv(wid, hei, color, opacity) {
+		var w = wid;
+		var h = hei;
 		var x = (ow-w)/2 + ox;
 		var y = (oh-h)/2 + oy;
-		
+
+		if (!color) color = '#ffffff';
 		var ediv = document.createElement("div");
-		ediv.style.backgroundColor = '#ffffff';
-		ediv.style.color 		= "#000000";
-		ediv.style.fontFamily	= "黑体";
-		ediv.style.fontSize 	= "12px";
+		ediv.style.backgroundColor = color;
 		ediv.style.position 	= "absolute";
 		ediv.style.left 		= x + 'px';
 		ediv.style.top 			= y + 'px';
 		ediv.style.width 		= w + 'px';
 		ediv.style.height		= h + 'px';
-		ediv.style.paddingTop	= '7px';
-		ediv.style.zIndex		= '2000';
-		ediv.style.display = 'none';
-		ediv.align = 'center';
-		ediv.innerHTML = '<span>Loading ...</span>';
+		ediv.style.display		= "none";
+		ediv.style.padding		= 15;
 		
 		insertDom(document.body, ediv);
+		if (opacity) setOpacity(ediv, opacity);
 		
 		return ediv;
-	}
-	
-	var i = 0;
-	function textd() {
-		var str = text.substr(0, i) + '&nbsp;' + text.substr(i+1);
-		div.innerHTML = str;
-		if (++i >= text.length) i=0;
-		
-		if (runing) {
-			setTimeout(textd, 100);
-		}
-	}
-	
-	this.show = function() {
-		runing = true;
-		textd();
-		showDiv(div);
-	}
-	
-	this.hide = function() {
-		hideDiv(div);
-		setTimeout( function() {
-			runing = false;
-		}, 500);
 	}
 }
