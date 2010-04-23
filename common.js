@@ -48,6 +48,19 @@ class:
 		show()
 		close()
 		setHtml(html)
+		getContentDiv()
+	ajax()
+		post(url)
+		get(url)
+		send(rul)
+		abort()
+		setAsync()
+		setRequestHeader()
+		setOkListener(h)
+		setTextListener(h)
+		setXmlListener(h)
+		setJSonListener(h)
+		setErrorListener(h)
 */
 
 (function() {
