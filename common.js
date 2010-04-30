@@ -151,7 +151,7 @@ function showError(msg) {
 	var ediv = document.createElement("div");
 	ediv.style.color = "#FF0000";
 	ediv.style.fontSize = "11px";
-	ediv.innerHTML = '<span>' + msg + '</span>';
+	ediv.innerText = msg;
 	insertDom(document.body, ediv);
 }
 
@@ -228,6 +228,11 @@ function getFormData(formid) {
 	var selects = form.getElementsByTagName("select");
 	for (var i=0; i<selects.length; ++i) {
 		pushvalue(selects[i].name, selects[i].value);
+	}
+	
+	var textareas = form.getElementsByTagName("textarea");
+	for (var i=0; i<textareas.length; ++i) {
+		pushvalue(textareas[i].name, textareas[i].innerText);
 	}
 	
 	return formtext.join('');
@@ -765,7 +770,13 @@ function Dialog(width, height) {
 	this.setHtml = function(html) {
 		div.innerHTML = html;
 		// 自动调整大小
-		div.style.height = div.scrollHeight;
+		var bodyh = document.body.clientHeight;
+		
+		var y = ( bodyh - div.scrollHeight ) / 2 - 20;
+		var h = div.scrollHeight - 50;
+		
+		div.style.top = y<0? 0 : y;
+		div.style.height = h<bodyh? h : bodyh;
 	}
 	
 	this.getContentDiv = function() {
