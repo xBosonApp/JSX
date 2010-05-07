@@ -16,8 +16,8 @@ function:
 	include(filename)
 	encodeUri(uri)
 	getDiv(divid)
-	showDiv(divid)
-	hideDiv(divid)
+	showDiv(divid, after)
+	hideDiv(divid, after)
 	divDisplay(divid)
 	changeTableColor(tableid, fcolor, scolor, mousecolor)
 	tableRowMouseOverListener(tableid, func)
@@ -28,8 +28,10 @@ function:
 	setX(obj, x)
 	setY(obj, y)
 	movex(obj, startx, finishx, after)
+	movey(obj, starty, finishy, after)
 	isie()
 	setOpacity(obj, opa)
+	animation(handle, start, end, locker)
 	
 class:
 	LockObj(obj)
@@ -222,6 +224,11 @@ function getFormData(formid) {
 	
 	var inputs = form.getElementsByTagName("input");
 	for (var i=0; i<inputs.length; ++i) {
+		if (inputs[i].type=='checkbox' || inputs[i].type=='radio') {
+			if (!inputs[i].checked) {
+				continue;
+			}
+		}
 		pushvalue(inputs[i].name, inputs[i].value);
 	}
 	
@@ -308,14 +315,15 @@ function getDiv(divid) {
 }
 
 /**
- * 显示div,参数可以是id也可以是div对象
+ * 显示div,参数可以是id也可以是div对象<br>
+ * aftershow()在显示后作
  */
-function showDiv(divid) {
+function showDiv(divid, aftershow) {
 	var div = getDiv(divid);
 	var alpha = 0;
 	var strength = 20;
 	
-	var func = function() {
+	div.func = function() {
 		if (alpha<100) {
 			if (isie()) {
 				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
@@ -323,26 +331,30 @@ function showDiv(divid) {
 			} else {
 				setOpacity(div, alpha);
 			}
-			setTimeout(func, 20);
+			setTimeout(div.func, 20);
 			alpha += 8;
 			strength-=2;
 		} else {
 			div.style.filter = null;
+			if (typeof aftershow=='function') {
+				aftershow();
+			}
 		}
 	}
-	func();
+	div.func();
 	div.style.display = "block";
 }
 
 /**
  * 隐藏div,参数可以是id也可以是div对象
+ * afterhide()在隐藏后作
  */
-function hideDiv(divid) {
+function hideDiv(divid, afterhide) {
 	var div = getDiv(divid);
 	var alpha = 90;
 	var strength = 0;
 	
-	var func = function() {
+	div.func = function() {
 		if (alpha>0) {
 			if (isie()) {
 				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
@@ -350,14 +362,17 @@ function hideDiv(divid) {
 			} else {
 				setOpacity(div, alpha);
 			}
-			setTimeout(func, 20);
+			setTimeout(div.func, 20);
 			alpha -= 8;
 			strength+=2;
 		} else {
 			div.style.display = "none";
+			if (typeof afterhide=='function') {
+				afterhide();
+			}
 		}
 	}
-	func();
+	div.func();
 }
 
 /**
@@ -380,15 +395,15 @@ function divDisplay(divid) {
  */
 function changeTableColor(tableid, fcolor, scolor, mousecolor) {
 	var table = getByid(tableid);
-	if (table==null) return;
+	if (table==null) table = tableid;
 	
 	var color = true;
 	
 	if (fcolor==null) {
-		fcolor = '#dddddd';
+		fcolor = '#FFFFFF';
 	}
 	if (scolor==null) {
-		scolor = '#f0f0f0';
+		scolor = '#FFFFFF';
 	}
 	if (mousecolor==null) {
 		mousecolor = '#ffaaaa';
@@ -440,15 +455,19 @@ function tableRowMouseOverListener(tableid, func) {
 }
 
 /**
- * 当鼠标悬停在obj标记上时，颜色变为color
+ * 当鼠标悬停在obj标记上时，颜色变为color<br>
+ * 此时如要改变背景色需使用obj.setBackColor('#xxxxxx')设置背景色<br>
  * 
  * @param obj - html标记对象
  * @param color - 有效的css颜色值
- * @return null
  */
 function onMouseOverChangeColor(obj, color) {
 	var oldcolor = getColorInt(obj.style.backgroundColor);
 	var ncolor = getColorInt(color);
+	
+	obj.setBackColor = function(newcolor) {
+		oldcolor = getColorInt(newcolor);
+	}
 	
 	obj.onmouseover = function() {
 		if (oldcolor) {
@@ -467,10 +486,12 @@ function onMouseOverChangeColor(obj, color) {
 }
 
 /**
- * obj的颜色由scolor变为ecolor, 颜色值为整数 
+ * obj的背景颜色由scolor变为ecolor, 颜色值为整数或css颜色字符串 
  */
 function transitionColor(obj, scolor, ecolor) {
 	var count = 15;
+	scolor = getColorInt(scolor);
+	ecolor = getColorInt(ecolor);
 	
 	var er = ecolor >>> 16;
 	var eg =(ecolor & 0x00ff00) >>> 8;
@@ -487,7 +508,7 @@ function transitionColor(obj, scolor, ecolor) {
 	var cc = 0;
 	var i = 0;
 	
-	var func = function() {
+	obj.transcol = function() {
 		if ( i<count ) {
 			sr += rstep;
 			sg += gstep;
@@ -495,11 +516,11 @@ function transitionColor(obj, scolor, ecolor) {
 			cc = (sr<<16) | (sg<<8) | (sb);
 			changeColor(obj, cc);
 			
-			setTimeout(func, 20);
+			setTimeout(obj.transcol, 20);
 			i++;
 		}
 	}
-	func();
+	obj.transcol();
 }
 
 /**
@@ -558,10 +579,10 @@ function LockObj(obj) {
  * css颜色格式('#000000')转换为整数，并返回
  */
 function getColorInt(csscolor) {
-	if (csscolor) {
+	if (typeof csscolor=="string") {
 		return parseInt( csscolor.substr(1,csscolor.length),16 );
 	} else {
-		return false; //0xffffff;
+		return csscolor; //0xffffff;
 	}
 }
 
@@ -571,16 +592,19 @@ function getColorInt(csscolor) {
  * @param obj - html标记对象
  * @param color - 有效的css颜色值, 如果color为整数自动格式化为css格式
  *					如果color===false, 则对象变为透明背景
- * @return null
  */
 function changeColor(obj, color) {
-	if (color===false) {
+	if (!color) {
 		obj.style.backgroundColor = '';
 	}
 	else if (isNaN(color)) {
 		obj.style.backgroundColor = color
 	} else {
 		var c = new Number(color).toString(16);
+		var zlen = 6 - c.length;
+		for (var i=0; i<zlen; ++i) {
+			c = '0' + c;
+		}
 		obj.style.backgroundColor = '#'+c;
 	}
 }
@@ -666,37 +690,91 @@ function DivPack(divid, touchid) {
 }
 
 function setX(obj, x) {
-	obj.style.left = x + 'px';
+	obj.style.pixelLeft = x;
 }
 
 function setY(obj, y) {
-	obj.style.top = parseInt(y) +  'px';
+	obj.style.pixelTop = y;
 }
 
 /**
  * 移动obj对象,从startx到finishx, 移动完成后调用after()
  */
 function movex(obj, startx, finishx, after) {
-	var func = false;
 	var size = Math.max(finishx,startx)-Math.min(finishx,startx);
 	var count = size/40;
 	var f = startx<finishx ? 1 : -1;
 	
-	func = function() {
+	obj.func = function() {
 		if ( f*startx < f*finishx ) {
 			count += 10;
 			s = size/count;
 			var step = 0.335 * s*s + 1;
 			startx += (f*step);
 			setX(obj, startx);
-			setTimeout(func, 20);
+			setTimeout(obj.func, 20);
 		} else {
 			setX(obj, finishx);
 			if (after) after();
 		}
 	}
 	
-	func();
+	obj.func();
+}
+
+function movey(obj, starty, finishy, after) {
+	var size = Math.max(finishy,starty)-Math.min(finishy,starty);
+	var f = starty<finishy ? 1 : -1;
+	var a = 2;
+	
+	obj.func = function() {
+		if ( f*starty < f*finishy ) {
+			size /= a;
+			if (size<a) size = a;
+			starty += (f*size);
+			setY(obj, starty);
+			setTimeout(obj.func, 30);
+		} else {
+			setY(obj, finishy);
+			if (after) after();
+		}
+	}
+	
+	obj.func();
+}
+
+/**
+ * 动画函数,start为起始值,end为结束值,
+ * 并在locker对象上加锁,
+ * handle是每次数值变换后执行的方法: 
+ * handle(value); -- value是当前变换的值
+ */
+function animation(handle, start, end, locker) {
+	var size = Math.max(start, end) - Math.min(start, end);
+	var f = start < end ? 1 : -1;
+	var a = 2;
+	
+	var fun = function() {
+		if ( f * start < f * end ) {
+			size /= a;
+			if (size<a) size = a;
+			start += (f*size);
+			handle(start);
+			
+			if (locker) {
+				setTimeout(locker.animation_lock, 30);
+			} else {
+				setTimeout(fun, 30);
+			}
+		} else {
+			handle(end);
+		}
+	}
+	
+	if (locker) {
+		locker.animation_lock = fun;
+	}
+	fun();
 }
 
 function isie() {
@@ -750,13 +828,26 @@ function Dialog(width, height) {
 	var oy = obj.offsetTop;
 	var ow = obj.clientWidth;
 	var oh = obj.clientHeight;
+	var oldresizehandle = false;
 	
 	var hide = createDiv(ow, oh, '#555', 50);
 	var div = createDiv(width, height);
 	
+	var resizeHid = function() {
+		var bw = document.body.clientWidth;
+		var bh = document.body.clientHeight;
+		var sw = document.body.scrollWidth;
+		var sh = document.body.scrollHeight;
+		hide.style.width 	= (bw>sw)?bw:sw + 'px';
+		hide.style.height	= (bh>sh)?bh:sh + 'px';
+	}
+	
 	/** 显示对话框 */
 	this.show = function() {
 		hide.style.display = "block";
+		oldresizehandle = window.onresize;
+		window.onresize = resizeHid;
+		resizeHid();
 		showDiv(div);
 	}
 	
@@ -764,6 +855,7 @@ function Dialog(width, height) {
 	this.close = function() {
 		hide.style.display = "none";
 		hideDiv(div);
+		window.onresize = oldresizehandle;
 	}
 	
 	/** 设置内容为html */
@@ -781,15 +873,6 @@ function Dialog(width, height) {
 	
 	this.getContentDiv = function() {
 		return div;
-	}
-
-	window.onresize = function() {
-		var bw = document.body.clientWidth;
-		var bh = document.body.clientHeight;
-		var sw = document.body.scrollWidth;
-		var sh = document.body.scrollHeight;
-		hide.style.width 	= (bw>sw)?bw:sw + 'px';
-		hide.style.height	= (bh>sh)?bh:sh + 'px';
 	}
 	
 	function createDiv(wid, hei, color, opacity) {
