@@ -31,7 +31,8 @@ function:
 	movey(obj, starty, finishy, after)
 	isie()
 	setOpacity(obj, opa)
-	animation(handle, start, end, locker)
+	anim(func, start, end, millise)
+	setMenu(menu, target);
 	
 class:
 	LockObj(obj)
@@ -74,8 +75,10 @@ class:
 		if (index>=0) {
 			path = srps[i].src.substring(0, index);
 			path = path + "JSX/"
+			
 			include(path + "ajax.js");
 			include(path + "dom.js");
+			include(path + "cookie.js");
 		}
 	}
 })();
@@ -320,29 +323,18 @@ function getDiv(divid) {
  */
 function showDiv(divid, aftershow) {
 	var div = getDiv(divid);
-	var alpha = 0;
-	var strength = 20;
+	var strength = 0;
 	
-	div.func = function() {
-		if (alpha<100) {
-			if (isie()) {
-				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
-						+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=200);";
-			} else {
-				setOpacity(div, alpha);
-			}
-			setTimeout(div.func, 20);
-			alpha += 8;
-			strength-=2;
-		} else {
-			div.style.filter = null;
-			if (typeof aftershow=='function') {
-				aftershow();
-			}
-		}
-	}
-	div.func();
 	div.style.display = "block";
+	anim(function(alpha) {
+		if (isie()) {
+			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
+					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=200);";
+		} else {
+			setOpacity(div, alpha);
+		}
+		strength = 70-alpha;
+	}, 0, 100, 700, aftershow);
 }
 
 /**
@@ -351,28 +343,22 @@ function showDiv(divid, aftershow) {
  */
 function hideDiv(divid, afterhide) {
 	var div = getDiv(divid);
-	var alpha = 90;
 	var strength = 0;
 	
-	div.func = function() {
-		if (alpha>0) {
-			if (isie()) {
-				div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
-						+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=35);";
-			} else {
-				setOpacity(div, alpha);
-			}
-			setTimeout(div.func, 20);
-			alpha -= 8;
-			strength+=2;
+	anim(function(alpha) {
+		if (isie()) {
+			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
+					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=35);";
 		} else {
-			div.style.display = "none";
-			if (typeof afterhide=='function') {
-				afterhide();
-			}
+			setOpacity(div, alpha);
 		}
-	}
-	div.func();
+		strength+=2;
+	}, 90, 0, 300, function() {
+		div.style.display = "none";
+		if (afterhide) {
+			afterhide();
+		}
+	});
 }
 
 /**
@@ -521,6 +507,7 @@ function transitionColor(obj, scolor, ecolor) {
 		}
 	}
 	obj.transcol();
+	
 }
 
 /**
@@ -605,6 +592,7 @@ function changeColor(obj, color) {
 		for (var i=0; i<zlen; ++i) {
 			c = '0' + c;
 		}
+
 		obj.style.backgroundColor = '#'+c;
 	}
 }
@@ -701,80 +689,15 @@ function setY(obj, y) {
  * 移动obj对象,从startx到finishx, 移动完成后调用after()
  */
 function movex(obj, startx, finishx, after) {
-	var size = Math.max(finishx,startx)-Math.min(finishx,startx);
-	var count = size/40;
-	var f = startx<finishx ? 1 : -1;
-	
-	obj.func = function() {
-		if ( f*startx < f*finishx ) {
-			count += 10;
-			s = size/count;
-			var step = 0.335 * s*s + 1;
-			startx += (f*step);
-			setX(obj, startx);
-			setTimeout(obj.func, 20);
-		} else {
-			setX(obj, finishx);
-			if (after) after();
-		}
-	}
-	
-	obj.func();
+	anim(function(v) {
+		setX(obj, v);
+	}, startx, finishx, 300, after);
 }
 
 function movey(obj, starty, finishy, after) {
-	var size = Math.max(finishy,starty)-Math.min(finishy,starty);
-	var f = starty<finishy ? 1 : -1;
-	var a = 2;
-	
-	obj.func = function() {
-		if ( f*starty < f*finishy ) {
-			size /= a;
-			if (size<a) size = a;
-			starty += (f*size);
-			setY(obj, starty);
-			setTimeout(obj.func, 30);
-		} else {
-			setY(obj, finishy);
-			if (after) after();
-		}
-	}
-	
-	obj.func();
-}
-
-/**
- * 动画函数,start为起始值,end为结束值,
- * 并在locker对象上加锁,
- * handle是每次数值变换后执行的方法: 
- * handle(value); -- value是当前变换的值
- */
-function animation(handle, start, end, locker) {
-	var size = Math.max(start, end) - Math.min(start, end);
-	var f = start < end ? 1 : -1;
-	var a = 2;
-	
-	var fun = function() {
-		if ( f * start < f * end ) {
-			size /= a;
-			if (size<a) size = a;
-			start += (f*size);
-			handle(start);
-			
-			if (locker) {
-				setTimeout(locker.animation_lock, 30);
-			} else {
-				setTimeout(fun, 30);
-			}
-		} else {
-			handle(end);
-		}
-	}
-	
-	if (locker) {
-		locker.animation_lock = fun;
-	}
-	fun();
+	anim(function(v) {
+		setY(obj, v);
+	}, starty, finishy, 300, after);
 }
 
 function isie() {
@@ -818,6 +741,95 @@ function Parabola(x1, x2, y) {
 	this.get = function(x) {
 		x = x-sx-w;
 		return x*x / p+my;
+	}
+}
+
+/**
+ * func - 动画函数格式: func(frame);
+ *		frame - 从start~end之间的数值
+ * start - 起始值
+ * end - 结束值
+ * millise - 耗费的时间
+ * after - 动画执行结束回叫函数
+ *
+ * 在millise时间中以每秒24帧的速度执行动画func(a),
+ * a的值从start,到end, 如果func速度太慢会跳帧
+ */
+function anim(func, start, end, millise, after) {
+	var oftime = 24;
+	var _1sec = 1000;
+	var oframe = _1sec / oftime;
+	var size = ( Math.max(start, end) - Math.min(start, end) );
+	var step = size / oftime / (millise / _1sec);
+	var f = start<end ? 1 : -1;
+	
+	var milliseconds = function () {
+		return new Date().getTime();
+	}
+	
+	var stime = milliseconds();
+	var utime = -1;
+	
+	var th = function() {
+		if (utime<0) {
+			utime = oframe;
+		} else {
+			utime = milliseconds() - utime;
+		}
+		
+		if ( f*start < f*end ) {
+			start += ((step * utime/oframe)*f);
+			
+			utime = milliseconds();
+			func(start);
+			setTimeout(th, 1);
+		} else {
+			func(end);
+			
+			if (typeof after=='function') {
+				after();
+			}
+		}
+	};
+	th();
+}
+
+/**
+ * 为target对象添加右键菜单
+ * menu对象是菜单
+ */
+function setMenu(menu, target) {
+	if (!target) {
+		target = document.body;
+	}
+	
+	menu.style.position = 'absolute';
+	menu.style.display = 'none';
+	var isin = false;
+	
+	target.oncontextmenu = function() {
+		menu.style.pixelLeft = event.x;
+		menu.style.pixelTop = event.y;		
+		menu.style.display = 'block';
+		
+		anim(function(p) {
+			setOpacity(menu, p);
+		}, 0, 80, 500);
+		
+		menu.onmouseleave  = function() {
+			hideDiv(menu);
+			isin = false;
+		}
+		
+		menu.onmouseover = function() {
+			isin = true;
+		}
+		
+		target.onclick = function() {
+			if (!isin) hideDiv(menu);
+		}
+		
+		return false;
 	}
 }
 

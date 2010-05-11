@@ -1,0 +1,7 @@
+*.class
+*.jar
+CVS
+.cvsignore
+.#*
+work
+classes
