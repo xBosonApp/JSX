@@ -1,6 +1,6 @@
 ﻿// CatfoOD 2009.12.9
 // charset: UTF-8
-// v0.17
+// v0.18
 
 /*
 	----- 目录 -----
@@ -69,6 +69,7 @@ class:
 (function() {
 	var head = document.getElementsByTagName("head")[0];
 	var srps = head.getElementsByTagName("script");
+	
 	for (var i=0; i<srps.length; ++i) {
 		var index = srps[i].src.indexOf("JSX/common.js");
 		
@@ -79,6 +80,8 @@ class:
 			include(path + "ajax.js");
 			include(path + "dom.js");
 			include(path + "cookie.js");
+			include(path + "fixfirefox.js");
+			break;
 		}
 	}
 })();
@@ -152,11 +155,11 @@ function getByid(id) {
  * 显示一个错误消息到状态条，并添加到文档末尾
  */
 function showError(msg) {
-	//window.status = msg;
+	window.status = msg;
 	var ediv = document.createElement("div");
 	ediv.style.color = "#FF0000";
 	ediv.style.fontSize = "11px";
-	ediv.innerText = msg;
+	ediv.innerHTML = msg;
 	insertDom(document.body, ediv);
 }
 
@@ -164,14 +167,10 @@ function showError(msg) {
  * 向obj对象的末尾添加dom元素
  */
 function insertDom(obj, dom) {
-	if (isie()) {
-		try {
-			obj.appendChild(dom);	
-		} catch(e) {
-			obj.insertAdjacentElement('afterEnd', dom);
-		}
-	} else {
-		obj.insertBefore(dom, null);
+	try {
+		var a = obj.appendChild(dom);
+	} catch(e) {
+		obj.insertAdjacentElement('afterEnd', dom);
 	}
 }
 
@@ -366,6 +365,7 @@ function hideDiv(divid, afterhide) {
  */
 function divDisplay(divid) {
 	var div = getDiv(divid);
+	if (!div) div = divid;
 	return div.style.display == "block";
 }
 
@@ -808,9 +808,9 @@ function setMenu(menu, target) {
 	var isin = false;
 	
 	target.oncontextmenu = function() {
-		menu.style.pixelLeft = event.x;
-		menu.style.pixelTop = event.y;		
-		menu.style.display = 'block';
+		menu.style.pixelLeft = event.x + target.scrollLeft;
+		menu.style.pixelTop  = event.y + target.scrollTop;	
+		menu.style.display   = 'block';
 		
 		anim(function(p) {
 			setOpacity(menu, p);
@@ -846,6 +846,7 @@ function Dialog(width, height) {
 	var div = createDiv(width, height);
 	
 	var resizeHid = function() {
+		hide.style.height = hide.style.width = '0px';
 		var bw = document.body.clientWidth;
 		var bh = document.body.clientHeight;
 		var sw = document.body.scrollWidth;
@@ -877,10 +878,10 @@ function Dialog(width, height) {
 		var bodyh = document.body.clientHeight;
 		
 		var y = ( bodyh - div.scrollHeight ) / 2 - 20;
-		var h = div.scrollHeight - 50;
+		var h = div.scrollHeight;
 		
 		div.style.top = y<0? 0 : y;
-		div.style.height = h<bodyh? h : bodyh;
+		div.style.height = h<bodyh ? h : bodyh;
 	}
 	
 	this.getContentDiv = function() {
@@ -900,11 +901,24 @@ function Dialog(width, height) {
 		ediv.style.left 		= x + 'px';
 		ediv.style.top 			= y + 'px';
 		ediv.style.width 		= w + 'px';
-		ediv.style.height		= h + 'px';
-		ediv.style.display		= "none";
 		ediv.style.padding		= 15;
-		
+		ediv.style.display		= "none";
 		insertDom(document.body, ediv);
+		
+		if (!isie()) {
+			ediv.style.overflow 	= 'hidden';
+			
+			ediv.onclick = function() {
+				ediv.style.height = '0px';
+				ediv.style.height = ediv.scrollHeight + 'px';
+				resizeHid();
+			}
+		} else {
+			ediv.onclick = function() {
+				resizeHid();
+			}
+		}
+
 		if (opacity) setOpacity(ediv, opacity);
 		
 		return ediv;
