@@ -7,6 +7,7 @@ if (typeof HTMLElement != 'undefined') {
 	fix_inner_text();
 	fix_style_pixel();
 	fix_event();
+	fix_parentElement();
 }
 
 function fix_select_tag() {
@@ -16,6 +17,16 @@ function fix_select_tag() {
 		index = index ? index : this.length;
 		this.options.add(option, index);
 	}
+}
+
+function fix_parentElement() {
+	HTMLElement.prototype.__defineGetter__("parentElement", function() {
+		return this.parentNode;
+	});
+	
+	HTMLElement.prototype.__defineSetter__("parentElement", function(v) {
+		this.parentNode = v;
+	});
 }
 
 function fix_inner_text() {
