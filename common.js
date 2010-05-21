@@ -78,6 +78,7 @@ class:
 			path = path + "JSX/"
 			
 			include(path + "ajax.js");
+			include(path + "selector.js");
 			include(path + "dom.js");
 			include(path + "cookie.js");
 			include(path + "fixfirefox.js");
@@ -845,6 +846,8 @@ function Dialog(width, height) {
 	var hide = createDiv(ow, oh, '#555', 50);
 	var div = createDiv(width, height);
 	
+	var selects = new selector('select');
+	
 	var resizeHid = function() {
 		hide.style.height = hide.style.width = '0px';
 		var bw = document.body.clientWidth;
@@ -862,6 +865,11 @@ function Dialog(width, height) {
 		window.onresize = resizeHid;
 		resizeHid();
 		showDiv(div);
+		
+		selects.todo(function (s) {
+			this.old_visibility = s.style.visibility; 
+			s.style.visibility = "hidden";
+		});
 	}
 	
 	/** 关闭对话框 */
@@ -869,6 +877,10 @@ function Dialog(width, height) {
 		hide.style.display = "none";
 		hideDiv(div);
 		window.onresize = oldresizehandle;
+		
+		selects.todo(function (s) {
+			s.style.visibility = this.old_visibility;
+		});
 	}
 	
 	/** 设置内容为html */

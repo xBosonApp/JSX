@@ -52,6 +52,7 @@ function node(element, path) {
 	return childs;
 }
 
+
 function Dom(xml) {
 	
 	var getElement = function(nodename, parent) {

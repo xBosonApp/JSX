@@ -61,6 +61,8 @@ function:
 	anim(func, start, end, millise)
 	// 为target设置右键菜单,menu指定菜单对象
 	setMenu(menu, target);
+	// 标签选择器
+	tagselector();
 	
 class:
 	LockObj(obj)
@@ -83,7 +85,7 @@ class:
 		close()
 		setHtml(html)
 		getContentDiv()
-	
+		
 	ajax()
 		post(url)
 		get(url)
