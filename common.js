@@ -78,7 +78,7 @@ class:
 			path = path + "JSX/"
 			
 			include(path + "ajax.js");
-			include(path + "selector.js");
+			include(path + "selector.js"); // 有问题
 			include(path + "dom.js");
 			include(path + "cookie.js");
 			include(path + "fixfirefox.js");
@@ -568,7 +568,19 @@ function LockObj(obj) {
  */
 function getColorInt(csscolor) {
 	if (typeof csscolor=="string") {
-		return parseInt( csscolor.substr(1,csscolor.length),16 );
+		
+		if (csscolor.indexOf("#")>=0) {
+			return parseInt( csscolor.substr(1,csscolor.length),16 );
+			
+		} else {
+			// firfox: 'rgb(r,g,b)'format
+			var arr = csscolor.split(","); 
+			var r = parseInt( arr[0].substring(4) ); 
+			var g = parseInt( arr[1] ); 
+			var b = parseInt( arr[2].substring(0,arr[2].length-1) );
+			
+			return r * 256 * 256 + g * 256 + b;
+		}
 	} else {
 		return csscolor; //0xffffff;
 	}

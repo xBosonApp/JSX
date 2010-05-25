@@ -4,14 +4,14 @@
  * 过滤选择器,首先从全部tag中取出名字tagName的tag
  * 进而可以用其他方法筛选出需要的tag
  */
-window.selector = function(tags_) {	
-	if (typeof tags_=="array") {
-		this.ts = tags_;
-	} 
-	else if (typeof tags_=="string"){
-		this.ts = document.getElementsByTagName(tags_);
-	}
-	else {
+var selector = function(tags_) {
+	if (tags_) {
+		if (typeof tags_=="string"){
+			this.ts = document.getElementsByTagName(tags_);
+		} else {
+			this.ts = tags_
+		}
+	} else {
 		this.ts = document.getElementsByTagName('*');
 	}
 }
@@ -20,39 +20,48 @@ selector.prototype = {
 		
 	// 筛选出指定name的tag
 	"tagname" : function(tagname_) {
-		var newtags = this.looptag(function(tag) {
+		return this.filter_tag(function(tag) {
 			return (tag.tagName && tag.tagName.toLowerCase()==tagname_);
 		});
-		return this.r(newtags);
 	},
 		
 	// 筛选出指定className的tag,
 	"clazz" : function(className_) {
-		var newtags = this.looptag(function(tag) {
-			return (tag.className && tag.className.toLowerCase()==className_);
+		return this.filter_tag(function(tag) {
+			return (tag.className && (tag.className.toLowerCase()==className_));
 		});
-		return this.r(newtags);
 	},
 	
 	// 筛选出指定id的tag
 	"id" : function(id_) {
-		var newtags = this.looptag(function(tag) {
+		return this.filter_tag(function(tag) {
 			return (tag.id && tag.id.toLowerCase()==id_);
 		});
-		return this.r(newtags);
 	},
 	
 	// 筛选出属性为attrName,并且值是value的标记
 	"attr" : function(attrName, value) {
-		var nt = this.looptag(function(tag) {
+		return this.filter_tag(function(tag) {
 			var v = tag.getAttribute(attrName);
 			return (v && v==value);
 		});
-		return this.r(nt);
+	},
+	
+	// 在标签中搜索子节点
+	"node" : function(path) {
+		var newTags = new Array();
+		this.todo(function(tag_){
+			var fi = node(tag_, path);
+			for (var i=0; i<fi.length; ++i) {
+				newTags.push(fi[i]);
+			}
+		});
+		return this.r(newTags);
 	},
 	
 	// 在筛选出的tags上执行handle_方法, function handle(tag) {...}
 	"todo" : function(handle_) {
+	//	alert(this.ts.length);
 		for (var i=0; i<this.ts.length; ++i) {
 			handle_(this.ts[i]);
 		}
@@ -62,6 +71,10 @@ selector.prototype = {
 	// 返回当前选择器下的全部对象
 	"getTags" : function() {
 		return this.ts;
+	},
+	
+	"size" : function() {
+		return this.ts.length;
 	},
 	
 	// ----------------------------------------------- 内部调用
@@ -75,18 +88,18 @@ selector.prototype = {
 	},
 	
 	// 循环所有标签,如果filter返回true,则加入被选标签组,并返回它
-	"looptag" : function(filter_) {
+	"filter_tag" : function(filter_) {
 		var newtags = new Array();
 
 		this.todo(function (tag) {
-			if (filter_(tag)) {
+			if (filter_(tag)==true) {
 				newtags.push(tag);
 			}
 		});
-		
-		return newtags;
+		return this.r(newtags);
 	}
 };
 
+window.selector = selector;
 
 })();
