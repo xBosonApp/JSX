@@ -508,7 +508,6 @@ function transitionColor(obj, scolor, ecolor) {
 		}
 	}
 	obj.transcol();
-	
 }
 
 /**

@@ -104,3 +104,4 @@ class:
 		attr(att)
 		todo(function)
 		getTags()
+		node(path)
