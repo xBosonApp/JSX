@@ -78,8 +78,8 @@ class:
 			path = path + "JSX/"
 			
 			include(path + "ajax.js");
-			include(path + "selector.js"); // 有问题
 			include(path + "dom.js");
+			include(path + "selector.js");
 			include(path + "cookie.js");
 			include(path + "fixfirefox.js");
 			break;

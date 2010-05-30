@@ -47,6 +47,13 @@ selector.prototype = {
 		});
 	},
 	
+	// 筛选出有指定属性的tag
+	"hasattr": function(attrName) {
+		return this.filter_tag(function(tag) {
+			return tag.getAttribute(attrName)!=undefined;
+		});
+	},
+	
 	// 在标签中搜索子节点
 	"node" : function(path) {
 		var newTags = new Array();

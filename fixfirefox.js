@@ -8,6 +8,27 @@ if (typeof HTMLElement != 'undefined') {
 	fix_style_pixel();
 	fix_event();
 	fix_parentElement();
+	fix_window();
+}
+
+function fix_window() {
+	var map = [
+		["screenLeft",	"screenX"],
+		["screenTop",	"screenY"]
+	];
+	
+	for (var i=0; i<map.length; ++i) {
+		(function () {
+			var iname = map[i][0];
+			var fname = map[i][1];
+			window.constructor.prototype.__defineGetter__(iname, function() {
+				return this[fname];
+			});
+			window.constructor.prototype.__defineSetter__(iname, function(v) {
+				this[fname] = v;
+			});
+		})();
+	}
 }
 
 function fix_select_tag() {
