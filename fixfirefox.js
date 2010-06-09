@@ -9,6 +9,33 @@ if (typeof HTMLElement != 'undefined') {
 	fix_event();
 	fix_parentElement();
 	fix_window();
+	fix_funcs();
+}
+
+function createEvent(eventType, event) {
+	var evt = document.createEvent(eventType); 
+	evt.initEvent(event, false, true);
+	return evt;
+}
+
+function fix_funcs() {
+	HTMLElement.prototype.click = function() {
+		var evt = createEvent("MouseEvents", "click");
+		this.dispatchEvent(evt); 
+	}
+	
+	HTMLElement.prototype.removeNode = function(delchilds) {
+		var p = this.parentNode;
+		p.removeChild(this);
+		
+		if (!delchilds) {
+			var nodelist = this.childNodes;
+			for (var i=0; i<nodelist.length; ++i) {
+				p.appendChild(nodelist[i]);
+			}
+		}
+		return this;
+	}
 }
 
 function fix_window() {
@@ -98,11 +125,16 @@ function fix_event() {
 	}
 	
 	function FixPrototypeForGecko()	{
-		HTMLElement.prototype.__defineGetter__("runtimeStyle",
+		HTMLElement.prototype.__defineGetter__(
+				"runtimeStyle",
 				element_prototype_get_runtimeStyle );
-		window.constructor.prototype.__defineGetter__("event",
+				
+		window.constructor.prototype.__defineGetter__(
+				"event",
 				window_prototype_get_event );
-		Event.prototype.__defineGetter__("srcElement",
+				
+		Event.prototype.__defineGetter__(
+				"srcElement",
 				event_prototype_get_srcElement );
 	}
 	
