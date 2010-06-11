@@ -151,20 +151,19 @@ function fix_event() {
 	}
 
 	function SearchEvent() {
-		if(document.all)
+		if(isie())
 			return window.event;
 			
-		func=SearchEvent.caller;
+		var func=SearchEvent.caller;
 		
-		while(func!=null)
-		{
-			var arg0=func.arguments[0];
-			if(arg0)
-			{
-				if(arg0.constructor==Event)
+		while(func!=null) {
+			var arg0 = func.arguments[0];
+			if(arg0) {
+				if(arg0.constructor==Event || arg0.constructor==MouseEvent) {
 					return arg0;
+				}
 			}
-			func=func.caller;
+			func = func.caller;
 		}
 		return null;
 	}

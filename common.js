@@ -817,28 +817,30 @@ function setMenu(menu, target) {
 	
 	menu.style.position = 'absolute';
 	menu.style.display = 'none';
-	var isin = false;
 	
 	target.oncontextmenu = function() {
-		menu.style.pixelLeft = event.x + target.scrollLeft;
-		menu.style.pixelTop  = event.y + target.scrollTop;	
+		menu.style.pixelLeft = event.clientX + target.scrollLeft;
+		menu.style.pixelTop  = event.clientY + target.scrollTop;	
 		menu.style.display   = 'block';
 		
 		anim(function(p) {
 			setOpacity(menu, p);
-		}, 0, 80, 500);
+		}, 0, 80, 300);
 		
-		menu.onmouseleave  = function() {
-			hideDiv(menu);
-			isin = false;
+		var hide = function() {
+			anim(function(p) {
+				setOpacity(menu, p);
+			}, 80, 0, 500, function() {
+				menu.style.display = 'none';
+			});
 		}
 		
-		menu.onmouseover = function() {
-			isin = true;
+		menu.onclick  = function() {
+			hide();
 		}
 		
 		target.onclick = function() {
-			if (!isin) hideDiv(menu);
+			hide();
 		}
 		
 		return false;
