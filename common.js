@@ -227,6 +227,8 @@ function getFormData(formid) {
 	
 	var inputs = form.getElementsByTagName("input");
 	for (var i=0; i<inputs.length; ++i) {
+		if (inputs[i].disabled) continue;
+		
 		if (inputs[i].type=='checkbox' || inputs[i].type=='radio') {
 			if (!inputs[i].checked) {
 				continue;
@@ -237,11 +239,13 @@ function getFormData(formid) {
 	
 	var selects = form.getElementsByTagName("select");
 	for (var i=0; i<selects.length; ++i) {
+		if (selects[i].disabled) continue;
 		pushvalue(selects[i].name, selects[i].value);
 	}
 	
 	var textareas = form.getElementsByTagName("textarea");
 	for (var i=0; i<textareas.length; ++i) {
+		if (textareas[i].disabled) continue;
 		pushvalue(textareas[i].name, textareas[i].innerText);
 	}
 	
