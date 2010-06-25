@@ -24,6 +24,12 @@ selector.prototype = {
 			return (tag.tagName && tag.tagName.toLowerCase()==tagname_);
 		});
 	},
+	
+	"name" : function(name_) {
+		return this.filter_tag(function(tag) {
+			return (tag.name && tag.name.toLowerCase()==name_);
+		});
+	},
 		
 	// 筛选出指定className的tag,
 	"clazz" : function(className_) {

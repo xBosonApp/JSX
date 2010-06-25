@@ -10,12 +10,23 @@ if (typeof HTMLElement != 'undefined') {
 	fix_parentElement();
 	fix_window();
 	fix_funcs();
+	fix_onpropertychange();
 }
 
 function createEvent(eventType, event) {
 	var evt = document.createEvent(eventType); 
 	evt.initEvent(event, false, true);
 	return evt;
+}
+
+function fix_onpropertychange() {
+	HTMLElement.prototype.__defineSetter__('onpropertychange', function(handle) {
+		if (typeof handle=='function') {
+			this.addEventListener("DOMAttrModified", function(e) {
+				handle(e);
+			}, false);	 
+		}
+	});
 }
 
 function fix_funcs() {
@@ -26,6 +37,9 @@ function fix_funcs() {
 	
 	HTMLElement.prototype.removeNode = function(delchilds) {
 		var p = this.parentNode;
+		// 如果removeNode() 2次,直接返回
+		if (!p) return;
+		
 		p.removeChild(this);
 		
 		if (!delchilds) {
@@ -169,5 +183,6 @@ function fix_event() {
 	}
 }
 
+window.fixfirefox = true;
 
 })();
