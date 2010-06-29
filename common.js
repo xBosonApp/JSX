@@ -876,12 +876,12 @@ function Dialog(width, height) {
 	}
 	
 	/** 显示对话框 */
-	this.show = function() {
+	this.show = function(showready) {
 		hide.style.display = "block";
 		oldresizehandle = window.onresize;
 		window.onresize = resizeHid;
 		resizeHid();
-		showDiv(div);
+		showDiv(div, showready);
 		
 		selects.todo(function (s) {
 			this.old_visibility = s.style.visibility; 
