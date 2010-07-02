@@ -174,6 +174,7 @@ function fix_event() {
 			var arg0 = func.arguments[0];
 			if(arg0) {
 				if(arg0.constructor==Event || arg0.constructor==MouseEvent) {
+//				if(arg0.constructor==Event || typeof arg0.constructor=='MouseEvent') {
 					return arg0;
 				}
 			}

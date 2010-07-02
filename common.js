@@ -479,7 +479,7 @@ function onMouseOverChangeColor(obj, color) {
 /**
  * obj的背景颜色由scolor变为ecolor, 颜色值为整数或css颜色字符串 
  */
-function transitionColor(obj, scolor, ecolor) {
+function transitionColor(obj, scolor, ecolor, waitTime) {
 	var count = 15;
 	scolor = getColorInt(scolor);
 	ecolor = getColorInt(ecolor);
@@ -499,6 +499,8 @@ function transitionColor(obj, scolor, ecolor) {
 	var cc = 0;
 	var i = 0;
 	
+	if (!waitTime) waitTime = 20;
+	
 	obj.transcol = function() {
 		if ( i<count ) {
 			sr += rstep;
@@ -507,7 +509,7 @@ function transitionColor(obj, scolor, ecolor) {
 			cc = (sr<<16) | (sg<<8) | (sb);
 			changeColor(obj, cc);
 			
-			setTimeout(obj.transcol, 20);
+			setTimeout(obj.transcol, waitTime);
 			i++;
 		}
 	}
@@ -603,16 +605,22 @@ function changeColor(obj, color) {
 	else if (isNaN(color)) {
 		obj.style.backgroundColor = color
 	} else {
-		var c = new Number(color).toString(16);
-		var zlen = 6 - c.length;
-		for (var i=0; i<zlen; ++i) {
-			c = '0' + c;
-		}
-
-		obj.style.backgroundColor = '#'+c;
+		obj.style.backgroundColor = int2color(color);
 	}
 }
 
+function int2color(i) {
+	i = parseInt(i);
+	if (i<0) i=0;
+	if (i>0xffffff) i=0xffffff;
+	
+	var c = new Number(i).toString(16);
+	var zlen = 6 - c.length;
+	for (var i=0; i<zlen; ++i) {
+		c = '0' + c;
+	}
+	return '#' + c;
+}
 
 /**
  * 对div标签的封装类，让divid指定的div可以被鼠标拖动
@@ -699,6 +707,16 @@ function setX(obj, x) {
 
 function setY(obj, y) {
 	obj.style.pixelTop = y;
+}
+
+function getTop(obj) {
+	var parent = obj;
+	var p_offset = 0;
+	while(parent) {
+		p_offset += parent.offsetTop;
+		parent = parent.parentElement;
+	}
+	return p_offset;
 }
 
 /**

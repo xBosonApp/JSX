@@ -65,7 +65,8 @@ selector.prototype = {
 		var newTags = new Array();
 		this.todo(function(tag_){
 			var fi = node(tag_, path);
-			for (var i=0; i<fi.length; ++i) {
+			var size = fi.length;
+			for (var i=0; i<size; ++i) {
 				newTags.push(fi[i]);
 			}
 		});
@@ -75,8 +76,11 @@ selector.prototype = {
 	// 在筛选出的tags上执行handle_方法, function handle(tag) {...}
 	"todo" : function(handle_) {
 	//	alert(this.ts.length);
-		for (var i=0; i<this.ts.length; ++i) {
-			handle_(this.ts[i]);
+		var size = this.ts.length;
+		var obj_arr = this.ts;
+		
+		for (var i=0; i<size; ++i) {
+			handle_(obj_arr[i]);
 		}
 		return this;
 	},

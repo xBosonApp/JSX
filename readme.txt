@@ -45,10 +45,14 @@ function:
 	changeColor(obj, color)
 	// 取得css颜色格式的int值
 	getColorInt(csscolor)
+	// 把int转换为css颜色
+	int2color(int)
 	// 直接设置obj的水平坐标(绝对定位)
 	setX(obj, x)
 	// 直接设置obj的垂直坐标(绝对定位)
 	setY(obj, y)
+	// 计算指定的标记对象到文档顶端的像素
+	getTop(tag)
 	// 动画化水平移动obj
 	movex(obj, startx, finishx, after)
 	// 动画化垂直移动obj
@@ -56,7 +60,7 @@ function:
 	// 如果是ie返回真
 	isie()
 	// 动画化设置obj的透明度
-	setOpacity(obj, opa)
+	setOpacity(obj, opa) [opa(0-100)]
 	// 一个动画函数,millise是从start到end的时间每次执行func
 	anim(func, start, end, millise)
 	// 为target设置右键菜单,menu指定菜单对象
