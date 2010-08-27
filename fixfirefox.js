@@ -24,7 +24,11 @@ function fix_onpropertychange() {
 		if (typeof handle=='function') {
 			this.addEventListener("DOMAttrModified", function(e) {
 				handle(e);
-			}, false);	 
+			}, false);
+			
+			this.addEventListener("input", function(e) {
+				handle(e);
+			}, false);
 		}
 	});
 }
