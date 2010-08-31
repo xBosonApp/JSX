@@ -33,6 +33,7 @@ function:
 	setOpacity(obj, opa)
 	anim(func, start, end, millise)
 	setMenu(menu, target);
+	insertAfter(newEl, targetEl);
 	
 class:
 	LockObj(obj)
@@ -172,6 +173,19 @@ function insertDom(obj, dom) {
 		var a = obj.appendChild(dom);
 	} catch(e) {
 		obj.insertAdjacentElement('afterEnd', dom);
+	}
+}
+
+/**
+ * 在targetEl元素的后面,插入newEl元素
+ */
+function insertAfter(newEl, targetEl) {
+	var parentEl = targetEl.parentNode;
+
+	if (parentEl.lastChild == targetEl) {
+		parentEl.appendChild(newEl);
+	} else {
+		parentEl.insertBefore(newEl, targetEl.nextSibling);
 	}
 }
 
