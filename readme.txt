@@ -101,6 +101,12 @@ class:
 		setJSonListener(h)
 		setErrorListener(h)
 		
+	ajaxform(form)
+		setTextListener(h)
+		setXmlListener(h)
+		setJSonListener(h)
+		setErrorListener(h)
+		
 	selector()
 		tagname(name)
 		clazz(name)

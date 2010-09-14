@@ -1,7 +1,7 @@
 ﻿// CatfoOD 2009.11.25
 // 依赖common.js
 // charset: UTF-8
-// v0.28
+// v0.29
 
 function ajax() {
 
@@ -278,5 +278,42 @@ function ajax() {
 	
 	this.getStatusText = function() {
 		return xmlreq.statusText;
+	}
+}
+
+
+/**
+ * 封装一个form为不刷新递交表单
+ * @param form - form对象,或form的id
+ */
+function ajaxform(form) {
+	if (typeof form=='string') {
+		form = getByid(form);
+	}
+	
+	if (!form) throw "创建ajaxform参数[form]无效";
+	
+	var jx = new ajax();
+	
+	form.onsubmit = function() {
+		var formdata = getFormData(form);
+		jx.post(form.action);
+		jx.send(formdata);
+		return false;
+	}
+	
+	var extendsName = [
+		'setTextListener', 'setXmlListener',
+		'setJSonListener', 'setErrorListener'
+	];
+	
+	var point = this;
+	for(var i=extendsName.length-1; i>=0; i--) {
+		(function() {
+			var name = extendsName[i];
+			point[name] = function(a,b,c) {
+				jx[name](a,b,c);
+			} 
+		})(); 
 	}
 }
