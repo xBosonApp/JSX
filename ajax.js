@@ -3,6 +3,9 @@
 // charset: UTF-8
 // v0.29
 
+/**
+ * 建议不要复用该对象的实例,部分游览器不支持(ie6)
+ */
 function ajax() {
 
 	var m_method = "GET";
@@ -295,24 +298,40 @@ function ajaxform(form) {
 	
 	var jx = new ajax();
 	
+	// 用来传递参数
+	var handles = [];
+	
 	form.onsubmit = function() {
 		var formdata = getFormData(form);
+		for (var name in handles) {
+			var funcs = handles[name];
+			for (var i in funcs) {
+				var func = funcs[i];
+				jx[name](func);
+			}
+		}
 		jx.post(form.action);
 		jx.send(formdata);
+		jx = new ajax();
 		return false;
 	}
 	
-	var extendsName = [
+	var funcNames = [
 		'setTextListener', 'setXmlListener',
 		'setJSonListener', 'setErrorListener'
 	];
 	
 	var point = this;
-	for(var i=extendsName.length-1; i>=0; i--) {
+	for(var i=funcNames.length-1; i>=0; i--) {
 		(function() {
-			var name = extendsName[i];
-			point[name] = function(a,b,c) {
-				jx[name](a,b,c);
+			var name = funcNames[i];
+			point[name] = function(_h) {
+				var funcs = handles[name];
+				if (!funcs) {
+					funcs = [];
+					handles[name] = funcs;
+				}
+				funcs.push(_h);
 			} 
 		})(); 
 	}
