@@ -708,7 +708,7 @@ function DivPack(divid, touchid) {
 		}
 		toucher.onmousedown = divmove;
 		toucher.onmousemove = mousemove;
-		toucher.onmouseover = cancelmove;
+	//	toucher.onmouseover = cancelmove;
 		toucher.onmouseup = cancelmove;
 		
 		div.style.position = "absolute";
