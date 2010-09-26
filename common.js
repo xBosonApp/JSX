@@ -707,9 +707,15 @@ function DivPack(divid, touchid) {
 			toucher = div;
 		}
 		toucher.onmousedown = divmove;
-		toucher.onmousemove = mousemove;
-	//	toucher.onmouseover = cancelmove;
 		toucher.onmouseup = cancelmove;
+		
+		var old_handle = document.onmousemove;
+		if (!old_handle) old_handle = function(){};
+		
+		document.onmousemove = function() {
+			mousemove();
+			old_handle();
+		}
 		
 		div.style.position = "absolute";
 	}
