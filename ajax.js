@@ -1,10 +1,15 @@
 ﻿// CatfoOD 2009.11.25
 // 依赖common.js
 // charset: UTF-8
-// v0.29
+// v0.30
 
 /**
- * 建议不要复用该对象的实例,部分游览器不支持(ie6)
+ * 复用该对象效率更高<br>
+ * 调用顺序: 
+ * 		1. setXxxListener() 
+ * 		2. open()/get()/post() 
+ * 		3. send()
+ * 		4. 重复 3.
  */
 function ajax() {
 
@@ -12,8 +17,14 @@ function ajax() {
 	var m_url = false;
 	var m_async = false;
 	var m_headles = new Array();
-	var xmlreq = creatHttpRequest();
+	var xmlreq = null;
+
 	
+	// 释放内存,防止内存泄漏,必须在请求结束后调用
+	var free = function() {
+		xmlreq.onreadystatechange = function() {};
+		xmlreq = null;
+	}
 	
 	var eventheadle = function() {
 		for (var i=0; i<m_headles.length; ++i) {
@@ -28,11 +39,23 @@ function ajax() {
 		xmlreq.setRequestHeader('charset', 'utf8');
 	}
 	
-	if (!xmlreq) {
-		showError("ajax.init: xml request error!");
-	}
-	else {
-		xmlreq.onreadystatechange = eventheadle;
+	var initHttpRequest = function() {
+		if (xmlreq)	free();
+		
+		xmlreq = creatHttpRequest();
+		if (!xmlreq) {
+			showError("ajax.init: create request error!");
+		}
+		else {
+			xmlreq.onreadystatechange = eventheadle;
+		}
+		
+		if (m_url) {
+			xmlreq.open(m_method, m_url, m_async);
+			initheader();
+		} else {
+			showError("ajax.init: url fail!");
+		}
 	}
 	
 	/**
@@ -42,14 +65,8 @@ function ajax() {
 		if (url) {
 			m_url = url;
 		}
-	if (!isie) {
-		m_async = false;
-		}
-		if (m_url) {
-			xmlreq.open(m_method, m_url, m_async);
-			initheader();
-		} else {
-			showError("ajax.open() url fail");
+		if (!isie) {
+			m_async = false;
 		}
 	}
 	
@@ -73,6 +90,7 @@ function ajax() {
 	 * 发送请求
 	 */
 	this.send = function(content) {
+		initHttpRequest();
 		if (!content) content = null;
 		xmlreq.send(content);
 	if (!isie()) {
@@ -301,7 +319,7 @@ function ajaxform(form) {
 	// 用来传递参数
 	var handles = [];
 	
-	form.onsubmit = function() {
+	var send = function() {
 		var formdata = getFormData(form);
 		for (var name in handles) {
 			var funcs = handles[name];
@@ -316,6 +334,10 @@ function ajaxform(form) {
 		return false;
 	}
 	
+	form.onsubmit = send;
+	this.send = send;
+	
+	// 从ajax继承的方法
 	var funcNames = [
 		'setTextListener', 'setXmlListener',
 		'setJSonListener', 'setErrorListener'
