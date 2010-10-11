@@ -65,6 +65,8 @@ function:
 	anim(func, start, end, millise)
 	// 为target设置右键菜单,menu指定菜单对象
 	setMenu(menu, target);
+	// 生成html tag对象的方法
+	dom_builder(node_data);
 	
 class:
 	LockObj(obj)

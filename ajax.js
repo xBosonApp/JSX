@@ -192,10 +192,10 @@ function ajax() {
 	/**
 	 * 添加json接收句柄，句柄格式：
 	 * headle(json);
-	 * 如果在解析js时出现异常,则json的error属性为true
-	 * 接受的字符串在json的jtext属性中
 	 * 
 	 * json - 应答返回的json对象
+	 * json.error - 如果在解析js时出现异常,则json的error属性为true
+	 * json.jtext - 接受的字符串在json的jtext属性中
 	 */
 	this.setJSonListener = function(headle) {
 		this.setTextListener( function(text) {
