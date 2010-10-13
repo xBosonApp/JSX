@@ -130,7 +130,7 @@ function dom_builder(node_arr) {
 		throw new Error("not found 'parent' attribute. or not html tag.");
 	
 	node_arr.parent = null;
-	node_arr.tags = [];
+	node_arr.tags = {};
 	
 	
 	function format_name(_name) {
@@ -181,6 +181,10 @@ function dom_builder(node_arr) {
 					_tag.attachEvent(name, handle);
 				}
 				else if (_tag.addEventListener) {
+					//addEventListener的第一个参数不带'on'
+					if (name.indexOf('on')==0) {
+						name = name.substr(2);
+					}
 					_tag.addEventListener(name, handle, false);
 				}
 				else {
@@ -196,6 +200,11 @@ function dom_builder(node_arr) {
 			if (!tagData) continue;
 			
 			var tag = document.createElement(tagData['tag']);
+			if (!tag) {
+				showError(tagRefName+"定义的标签名:"+tagData['tag']+"无效");
+				continue;
+			}
+
 			tag_ref[tagRefName] = tag;
 			tagData['obj'] = tag;
 			

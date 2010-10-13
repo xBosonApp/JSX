@@ -1,6 +1,7 @@
 (function () {
 	
 // 在fireFox中给HTMLTag增加IE的一些属性
+// 修正成功后 window.fixfirefox == true
 	
 if (typeof HTMLElement != 'undefined') {
 	fix_select_tag();
@@ -54,6 +55,16 @@ function fix_funcs() {
 		}
 		return this;
 	}
+	
+	var attachEvent = function(eventName, handle) {
+		if (eventName.indexOf('on')==0) {
+			eventName = eventName.substr(2);
+		}
+		this.addEventListener(eventName, handle, false);
+	}
+	
+	HTMLElement.prototype.attachEvent = attachEvent;
+	window.constructor.prototype.attachEvent = attachEvent;
 }
 
 function fix_window() {
