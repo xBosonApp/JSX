@@ -56,6 +56,7 @@ selector.prototype = {
 	// 筛选出有指定属性的tag
 	"hasattr": function(attrName) {
 		return this.filter_tag(function(tag) {
+			// 如果修改为!== 会引起兼容问题
 			return tag.getAttribute(attrName)!=undefined;
 		});
 	},
