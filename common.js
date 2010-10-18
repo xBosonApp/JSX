@@ -1,71 +1,6 @@
 ﻿// CatfoOD 2009.12.9
 // charset: UTF-8
-// v0.18
-
-/*
-	----- 目录 -----
-function:
-	waitTag(alertfunc, id)
-	waitBody(alertfunc)
-	moveCenter(divid)
-	getByid(id)
-	showError(msg)
-	insertDom(obj, dom)
-	getFormData(formid)
-	creatHttpRequest()
-	include(filename)
-	encodeUri(uri)
-	getDiv(divid)
-	showDiv(divid, after)
-	hideDiv(divid, after)
-	divDisplay(divid)
-	changeTableColor(tableid, fcolor, scolor, mousecolor)
-	tableRowMouseOverListener(tableid, func)
-	onMouseOverChangeColor(obj, color)
-	transitionColor(obj, scolor, ecolor)
-	changeColor(obj, color)
-	getColorInt(csscolor)
-	setX(obj, x)
-	setY(obj, y)
-	movex(obj, startx, finishx, after)
-	movey(obj, starty, finishy, after)
-	isie()
-	setOpacity(obj, opa)
-	anim(func, start, end, millise)
-	setMenu(menu, target);
-	insertAfter(newEl, targetEl);
-	
-class:
-	LockObj(obj)
-		lock()
-		check()
-		free()
-	DivPack(divid, touchid)
-		setX()
-		setY()
-		getX()
-		getY()
-		getDiv()
-	Parabola(x1, x2, y)
-		get(x)
-	Dialog(w,h)
-		show()
-		close()
-		setHtml(html)
-		getContentDiv()
-	ajax()
-		post(url)
-		get(url)
-		send(rul)
-		abort()
-		setAsync()
-		setRequestHeader()
-		setOkListener(h)
-		setTextListener(h)
-		setXmlListener(h)
-		setJSonListener(h)
-		setErrorListener(h)
-*/
+// v0.19
 
 (function() {
 	var head = document.getElementsByTagName("head")[0];
@@ -386,6 +321,19 @@ function divDisplay(divid) {
 	var div = getDiv(divid);
 	if (!div) div = divid;
 	return div.style.display == "block";
+}
+
+/**
+ * 返回标签的背景色
+ */
+function getBGColor(obj)  {
+	var color;
+	if (isie()) {
+		color = obj.currentStyle.backgroundColor;
+	} else {
+		color = window.getComputedStyle(obj,null).backgroundColor;
+	}
+	return int2color(getColorInt(color));
 }
 
 

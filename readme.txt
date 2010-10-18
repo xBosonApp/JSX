@@ -64,9 +64,13 @@ function:
 	// 一个动画函数,millise是从start到end的时间每次执行func
 	anim(func, start, end, millise)
 	// 为target设置右键菜单,menu指定菜单对象
-	setMenu(menu, target);
+	setMenu(menu, target)
 	// 生成html tag对象的方法
-	dom_builder(node_data);
+	dom_builder(node_data)
+	// 取得标签对象的背景色
+	getBGColor(obj)
+	// 方便创建dom元素
+	dom_builder(arr)
 	
 class:
 	LockObj(obj)
@@ -118,3 +122,4 @@ class:
 		getTags()
 		node(path)
 		hasattr(attrName)
+		
