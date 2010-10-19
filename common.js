@@ -327,13 +327,21 @@ function divDisplay(divid) {
  * 返回标签的背景色
  */
 function getBGColor(obj)  {
-	var color;
-	if (isie()) {
-		color = obj.currentStyle.backgroundColor;
-	} else {
-		color = window.getComputedStyle(obj,null).backgroundColor;
-	}
+	var color = getStyle(obj).backgroundColor;
 	return int2color(getColorInt(color));
+}
+
+/**
+ * 取得html对象的style属性,该方法可以取得css中定义的值
+ */
+function getStyle(obj) {
+	var style = null;
+	if (isie()) {
+		style = obj.currentStyle;
+	} else {
+		style = window.getComputedStyle(obj,null);
+	}
+	return style;
 }
 
 
