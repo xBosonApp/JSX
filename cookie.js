@@ -56,14 +56,12 @@ function cookie(save_time) {
 		var arg = name + "=";
 		var alen = arg.length;
 		var clen = document.cookie.length;
-		var i = 0;
-		while (i < clen) {
+		var i = document.cookie.indexOf(arg);
+		if (i>=0) {
 			var j = i + alen;
-			if (document.cookie.substring(i, j) == arg)
+			if (j<clen) {
 				return GetCookieVal(j);
-			i = document.cookie.indexOf("  ", i) + 1;
-			if (i == 0)
-				break;
+			}
 		}
 		return null;
 	}
