@@ -73,6 +73,8 @@ function:
 	dom_builder(arr)
 	// 取得html对象的style属性,该方法可以取得css中定义的值
 	getStyle(obj)
+	// 为tag绑定onchange事件
+	onchange(tag, handle)
 	
 class:
 	LockObj(obj)

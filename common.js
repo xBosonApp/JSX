@@ -45,6 +45,39 @@ function waitTag(alertfunc, id) {
 	func();
 }
 
+/**
+ * 给表单tag绑定onchange事件,该方法不会引起问题
+ * 当表单的值value放生改变时激活eventHandle,这是一个轮询的方法
+ * 效率不高,而且改变后会有延迟
+ * @param {} input_tag
+ * @param {} eventHandle
+ */
+function onchange(input_tag, eventHandle) {
+	var name = 'jym.jsx.onchange.handles.cache';
+	
+	if (input_tag && typeof eventHandle=='function') {
+		var handles = window[name];
+		if (!handles) {
+			window[name] = handles = [];
+			setInterval(function() {
+				for (var h in handles) { 
+					handles[h]();
+				}
+			}, 500);
+		}
+		
+		var oldvalue = input_tag.value;
+		handles.push(function() {
+			if (input_tag.value != oldvalue) {
+				eventHandle();
+				oldvalue = input_tag.value;
+			}
+		});
+	} else {
+		throw new Error("参数错误");
+	}
+}
+
 function waitBody(alertfunc) {
 	var f = function() {
 		if (!document.body) {
