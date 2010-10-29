@@ -756,7 +756,7 @@ function isie() {
  */
 function setOpacity(obj, opa) {
 	if (isie()) {
-		obj.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity='+opa+');';
+		obj.style.filter = 'alpha(opacity='+opa+');';
 	} else {
 		obj.style.opacity = opa/100;
 	}
