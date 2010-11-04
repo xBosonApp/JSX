@@ -45,6 +45,13 @@ function waitTag(alertfunc, id) {
 	func();
 }
 
+/** 等待res资源加载完成, 后执行whenFinish方法 */
+function waitRes(res, whenFinish) {
+	var _w = function() {
+		res ? whenFinish() : setTimeout(_w, 500);
+	}; _w();
+}
+
 /**
  * 给表单tag绑定onchange事件,该方法不会引起问题
  * 当表单的值value放生改变时激活eventHandle,这是一个轮询的方法

@@ -75,6 +75,8 @@ function:
 	getStyle(obj)
 	// 为tag绑定onchange事件
 	onchange(tag, handle)
+	// 等待res完成,并执行方法
+	waitRes(res, whenFinish)
 	
 class:
 	LockObj(obj)
