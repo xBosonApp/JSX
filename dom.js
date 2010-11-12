@@ -102,6 +102,7 @@ function Dom(xml) {
  * 创建dom文档的便捷方法,为了便于引用对象,深层次的[引用名]如果没有重复,可以直接引用node_arr.tags[深层次没有重复的名字]<br>
  * 另外,返回的数据加入obj属性,该属性引用创建出的标签对象<br>
  * <b>注意:</b> class 属性需要使用引号,或使用clazz属性代替<br>
+ * 导出release()方法,提供释放内存的方法,在任意对象上调用release会引起整个dom树的释放<br>
  * <br>
  * node_arr的格式:<br><pre>
  * {
@@ -174,8 +175,10 @@ function dom_builder(node_arr) {
 	}
 	
 	function banding_event(_tag, _events) {
+		
 		for (var name in _events) {
 			var handle = _events[name];
+			
 			if (typeof handle == 'function') {
 				if (_tag.attachEvent) {
 					_tag.attachEvent(name, handle);
@@ -192,14 +195,41 @@ function dom_builder(node_arr) {
 				}
 			}
 		}
+		
+		_events._release_events = function() {
+			for (var name in _events) {
+				var handle = _events[name];
+				
+				if (typeof handle == 'function') {
+					if (_tag.attachEvent) {
+						_tag.detachEvent(name, handle);
+					}
+					else if (_tag.addEventListener) {
+						//addEventListener的第一个参数不带'on'
+						if (name.indexOf('on')==0) {
+							name = name.substr(2);
+						}
+						_tag.removeEventListener(name, handle, false);
+					}
+					else {
+						_tag[name] = null;
+					}
+				}
+				_events[name] = null;
+			}
+		}
 	}
-	
+
 	function create_sub(_parentNode, node_data, tag_ref) {
+		
 		for (var tagRefName in node_data) {
+			if (tagRefName=='tags') continue;
+			
 			var tagData = node_data[tagRefName];
 			if (!tagData) continue;
 			
 			var tag = document.createElement(tagData['tag']);
+			_parentNode.appendChild(tag);
 			if (!tag) {
 				showError(tagRefName+"定义的标签名:"+tagData['tag']+"无效");
 				continue;
@@ -208,7 +238,7 @@ function dom_builder(node_arr) {
 			tag_ref[tagRefName] = tag;
 			tagData['obj'] = tag;
 			
-			if (!node_arr.tags[tagRefName]) {
+			if (node_data!=node_arr && !node_arr.tags[tagRefName]) {
 				node_arr.tags[tagRefName] = tag;
 			}
 			
@@ -237,9 +267,35 @@ function dom_builder(node_arr) {
 			if (typeof subs_node_data=='object') {
 				create_sub(tag, subs_node_data, tag_ref[tagRefName]);
 			}
-			
-			_parentNode.appendChild(tag);
+				
+			var _release = function() { 
+				tag.release = null; 
+				node_data.release = null;
+				
+				if (events && events._release_events) {
+					events._release_events();
+					events._release_events = null
+					events = null;
+				}
+				
+				if (_parentNode.release) {
+					_parentNode.release();
+					_parentNode = null;
+				}
+				
+				for (var _sub in subs_node_data) {
+					if (subs_node_data && subs_node_data.release) {
+						subs_node_data.release();
+						subs_node_data = null;
+					}
+				}
+				tagData['obj'] = null;
+				node_data.parent = node_data.tags = null;
+			}
 		}
+		
+		tag.release = _release;
+		node_data.release = _release;
 	}
 	
 	create_sub(parentNode, node_arr, node_arr.tags);

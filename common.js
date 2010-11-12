@@ -165,6 +165,26 @@ function insertAfter(newEl, targetEl) {
 }
 
 /**
+ * 当_dom_tag对象从dom树中被删除时，
+ * 移除指定的事件
+ */
+function leakattr(_dom_tag) {
+	var _ie = isie();
+	var _args = arguments;
+	
+	var _check = function() {
+		if ( _ie ? _dom_tag.parentElement : _dom_tag.parentNode ) {
+			setTimeout(_check, 2200);
+		} else {
+			for (var i = 1; i<_args.length; i++) {
+				_dom_tag[_args[i]] = null;
+			}
+		}
+	}
+	_check();
+}
+
+/**
  * 包含入filename指定的js脚本文件<br>
  * 包含文件的目录相对于html文档的目录,或'/'开始相对网站目录<br>
  * 
@@ -477,6 +497,7 @@ function onMouseOverChangeColor(obj, color) {
 			changeColor(obj, ncolor);
 		}
 	}
+	
 	obj.onmouseout = function() {
 		if (oldcolor) {
 			transitionColor(obj, ncolor, oldcolor);
@@ -484,6 +505,8 @@ function onMouseOverChangeColor(obj, color) {
 			changeColor(obj, oldcolor);
 		}
 	}
+	
+//	leakattr(obj, 'onmouseover', 'onmouseout', 'transcol');
 }
 
 /**

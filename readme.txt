@@ -77,6 +77,8 @@ function:
 	onchange(tag, handle)
 	// 等待res完成,并执行方法
 	waitRes(res, whenFinish)
+	// 解决交叉引用的内存泄漏, [未完成]
+	leakattr(tag, names...)
 	
 class:
 	LockObj(obj)
