@@ -77,8 +77,10 @@ function:
 	onchange(tag, handle)
 	// 等待res完成,并执行方法
 	waitRes(res, whenFinish)
-	// 解决交叉引用的内存泄漏, [未完成]
-	leakattr(tag, names...)
+	// 删除指定标签上所有与脚本交叉关联的对象
+	removeAllCrossLink(tag)
+	// 当dom对象从文档中删除后,立即删除与脚本的交叉引用
+	onremove(tag)
 	
 class:
 	LockObj(obj)

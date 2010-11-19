@@ -165,23 +165,56 @@ function insertAfter(newEl, targetEl) {
 }
 
 /**
- * 当_dom_tag对象从dom树中被删除时，
- * 移除指定的事件
+ * 删除指定标签上所有与脚本交叉关联的对象,
+ * 解决ie中内存泄漏的问题, 只在ie中起作用
  */
-function leakattr(_dom_tag) {
-	var _ie = isie();
-	var _args = arguments;
-	
-	var _check = function() {
-		if ( _ie ? _dom_tag.parentElement : _dom_tag.parentNode ) {
-			setTimeout(_check, 2200);
-		} else {
-			for (var i = 1; i<_args.length; i++) {
-				_dom_tag[_args[i]] = null;
+function removeAllCrossLink(_tag) {
+	if (isie()) {
+		var attrs = _tag.attributes;
+		for (var name in attrs) {
+			try {
+				_tag[name] = null; 
+			} catch(E) {
 			}
 		}
 	}
-	_check();
+}
+
+/**
+ * 当_dom_tag对象从dom树中被删除时，
+ * 移除指定的事件
+ */
+function onremove(_dom_tag) {
+	if (isie()) {
+		var name = 'jym.jsx.onremove.event.cache';
+		var handles = window[name];
+		
+		if (!handles) {
+			handles = window[name] = [];
+			var index = 0; 
+			
+			var _check = function() {
+				if (index < index.length) {
+					++index;
+				} else {
+					index = 0;
+				}
+				if (handles[index] && handles[index]()) {
+					delete handles[index];
+				}
+				setTimeout(_check, 800);
+			}
+			_check();
+		}
+		
+		handles.push(function() {
+			var _p = _dom_tag.parentElement;
+			if (!_p) {
+				removeAllCrossLink(_dom_tag);
+			}
+			return !_p; 
+		});
+	}
 }
 
 /**
@@ -506,7 +539,7 @@ function onMouseOverChangeColor(obj, color) {
 		}
 	}
 	
-//	leakattr(obj, 'onmouseover', 'onmouseout', 'transcol');
+	onremove(obj);
 }
 
 /**
@@ -542,7 +575,9 @@ function transitionColor(obj, scolor, ecolor, waitTime) {
 			cc = (sr<<16) | (sg<<8) | (sb);
 			changeColor(obj, cc);
 			
-			setTimeout(obj.transcol, waitTime);
+			if (obj.transcol) {
+				setTimeout(obj.transcol, waitTime);
+			}
 			i++;
 		}
 	}

@@ -65,7 +65,7 @@ function ajax() {
 		if (url) {
 			m_url = url;
 		}
-		if (!isie) {
+		if (!isie()) {
 			m_async = false;
 		}
 	}

@@ -123,6 +123,7 @@ function Dom(xml) {
  * </pre>
  * 
  * @param {} node_arr - 创建dom文档需要的数据
+ * XXX 内存泄露
  */
 function dom_builder(node_arr) {
 	 
@@ -195,29 +196,6 @@ function dom_builder(node_arr) {
 				}
 			}
 		}
-		
-		_events._release_events = function() {
-			for (var name in _events) {
-				var handle = _events[name];
-				
-				if (typeof handle == 'function') {
-					if (_tag.attachEvent) {
-						_tag.detachEvent(name, handle);
-					}
-					else if (_tag.addEventListener) {
-						//addEventListener的第一个参数不带'on'
-						if (name.indexOf('on')==0) {
-							name = name.substr(2);
-						}
-						_tag.removeEventListener(name, handle, false);
-					}
-					else {
-						_tag[name] = null;
-					}
-				}
-				_events[name] = null;
-			}
-		}
 	}
 
 	function create_sub(_parentNode, node_data, tag_ref) {
@@ -272,11 +250,7 @@ function dom_builder(node_arr) {
 				tag.release = null; 
 				node_data.release = null;
 				
-				if (events && events._release_events) {
-					events._release_events();
-					events._release_events = null
-					events = null;
-				}
+				removeAllCrossLink(tag);
 				
 				if (_parentNode.release) {
 					_parentNode.release();
@@ -291,6 +265,7 @@ function dom_builder(node_arr) {
 				}
 				tagData['obj'] = null;
 				node_data.parent = node_data.tags = null;
+				node_arr = null;
 			}
 		}
 		
