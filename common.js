@@ -1,6 +1,6 @@
 ﻿// CatfoOD 2009.12.9
 // charset: UTF-8
-// v0.19
+// v0.20
 
 (function() {
 	var head = document.getElementsByTagName("head")[0];
@@ -859,9 +859,49 @@ function Parabola(x1, x2, y) {
  * end - 结束值
  * millise - 耗费的时间
  * after - 动画执行结束回叫函数
+ * <br>
+ * 在millise时间中以每秒24帧的速度执行动画func(a),
+ * a的值从start,到end, 如果func速度太慢会跳帧
+ * <br>
+ * <b>该函数使用曲线过渡使动画更平滑</b>
+ */
+function conic(func, start, end, millise, after) {
+	var base = Math.min(start, end);
+	var len = Math.max(start, end) - base;
+	var para;
+	var filter;
+
+	if (start<end) {
+		para = new Parabola(start, end+len, len);
+		
+		filter = function(n) {
+			func( base+para.get(n) );
+		}
+	} else {
+		para = new Parabola(start+len, end, len);
+
+		var a = base+start;
+		var b = base+len;
+		filter = function(n) {
+			func( b-para.get( a-n ) );
+		}
+	}
+
+	anim(filter, start, end, millise, after);
+}
+
+/**
+ * func - 动画函数格式: func(frame);
+ *		frame - 从start~end之间的数值
+ * start - 起始值
+ * end - 结束值
+ * millise - 耗费的时间
+ * after - 动画执行结束回叫函数
  *
  * 在millise时间中以每秒24帧的速度执行动画func(a),
  * a的值从start,到end, 如果func速度太慢会跳帧
+ * <br>
+ * <b>动画效果是线性的, 没有过渡效果</b>
  */
 function anim(func, start, end, millise, after) {
 	var oftime = 24;
