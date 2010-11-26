@@ -2,7 +2,8 @@
 	
 // 在fireFox中给HTMLTag增加IE的一些属性
 // 修正成功后 window.fixfirefox == true
-	
+
+//XXX fix fire fox
 if (typeof HTMLElement != 'undefined') {
 	fix_select_tag();
 	fix_inner_text();
@@ -12,6 +13,19 @@ if (typeof HTMLElement != 'undefined') {
 	fix_window();
 	fix_funcs();
 	fix_onpropertychange();
+	fixModalDialog();
+}
+
+
+function fixModalDialog() {
+	if (!window.showModalDialog) {
+		window.showModalDialog = function(href, args, sFeatures) {
+			var newWin = window.open(href, '_blank', sFeatures);
+			newWin.dialogArguments = args;
+			newWin.opener = window;
+			return args;
+		}
+	}
 }
 
 function createEvent(eventType, event) {
@@ -64,7 +78,7 @@ function fix_funcs() {
 	}
 	
 	HTMLElement.prototype.attachEvent = attachEvent;
-	window.constructor.prototype.attachEvent = attachEvent;
+	window.attachEvent = attachEvent;
 }
 
 function fix_window() {
@@ -77,10 +91,10 @@ function fix_window() {
 		(function () {
 			var iname = map[i][0];
 			var fname = map[i][1];
-			window.constructor.prototype.__defineGetter__(iname, function() {
+			window.__defineGetter__(iname, function() {
 				return this[fname];
 			});
-			window.constructor.prototype.__defineSetter__(iname, function(v) {
+			window.__defineSetter__(iname, function(v) {
 				this[fname] = v;
 			});
 		})();
@@ -158,7 +172,7 @@ function fix_event() {
 				"runtimeStyle",
 				element_prototype_get_runtimeStyle );
 				
-		window.constructor.prototype.__defineGetter__(
+		window.__defineGetter__(
 				"event",
 				window_prototype_get_event );
 				
@@ -188,8 +202,7 @@ function fix_event() {
 		while(func!=null) {
 			var arg0 = func.arguments[0];
 			if(arg0) {
-				if(arg0.constructor==Event || arg0.constructor==MouseEvent) {
-//				if(arg0.constructor==Event || typeof arg0.constructor=='MouseEvent') {
+				if(arg0.constructor==Event || typeof arg0.constructor==typeof MouseEvent) {
 					return arg0;
 				}
 			}

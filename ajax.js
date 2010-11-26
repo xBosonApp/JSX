@@ -302,7 +302,6 @@ function ajax() {
 	}
 }
 
-
 /**
  * 封装一个form为不刷新递交表单
  * @param form - form对象,或form的id

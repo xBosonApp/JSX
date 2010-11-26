@@ -59,6 +59,8 @@ function:
 	movey(obj, starty, finishy, after)
 	// 如果是ie返回真
 	isie()
+	// 如果是opera返回true
+	isopera()
 	// 动画化设置obj的透明度
 	setOpacity(obj, opa) [opa(0-100)]
 	// 一个动画函数,millise是从start到end的时间每次执行func

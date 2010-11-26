@@ -810,10 +810,18 @@ function movey(obj, starty, finishy, after) {
 
 function isie() {
 	var name = 'jym.jsx.iename.cache';
-	if (!window[name]) {
-		 window[name] = navigator.appName.search('Microsoft');
+	if (window[name]===undefined) {
+		window[name] = navigator.appName.search('Microsoft')>=0;
 	}
-	return window[name]>=0;
+	return window[name];
+}
+
+function isopera() {
+	var name = 'jym.jsx.isopera.cache';
+	if (window[name]===undefined) {
+		window[name] = navigator.appName.indexOf('Opera')>=0;
+	}
+	return window[name];
 }
 
 /**
