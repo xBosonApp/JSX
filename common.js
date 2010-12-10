@@ -369,7 +369,7 @@ function getDiv(divid) {
  */
 function showDiv(divid, aftershow) {
 	var div = getDiv(divid);
-	var strength = 0;
+	var strength = 100;
 	
 	div.style.display = "block";
 	anim(function(alpha) {
@@ -389,7 +389,7 @@ function showDiv(divid, aftershow) {
  */
 function hideDiv(divid, afterhide) {
 	var div = getDiv(divid);
-	var strength = 0;
+	var strength = 1;
 	
 	anim(function(alpha) {
 		if (isie()) {

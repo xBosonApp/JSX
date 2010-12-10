@@ -83,6 +83,8 @@ function:
 	removeAllCrossLink(tag)
 	// 当dom对象从文档中删除后,立即删除与脚本的交叉引用
 	onremove(tag)
+	// 同anim的参数, 动画效果更圆滑
+	conic(func, start, end, millise)
 	
 class:
 	LockObj(obj)
