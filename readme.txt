@@ -85,6 +85,8 @@ function:
 	onremove(tag)
 	// 同anim的参数, 动画效果更圆滑
 	conic(func, start, end, millise)
+	// 为事件处理提供通用的栈
+	eventStack(obj, eventName, newEvent)
 	
 class:
 	LockObj(obj)

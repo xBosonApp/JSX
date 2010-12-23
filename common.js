@@ -883,7 +883,7 @@ function conic(func, start, end, millise, after) {
 		para = new Parabola(start, end+len, len);
 		
 		filter = function(n) {
-			func( base+para.get(n) );
+			return func( base+para.get(n) );
 		}
 	} else {
 		para = new Parabola(start+len, end, len);
@@ -891,7 +891,7 @@ function conic(func, start, end, millise, after) {
 		var a = base+start;
 		var b = base+len;
 		filter = function(n) {
-			func( b-para.get( a-n ) );
+			return func( b-para.get( a-n ) );
 		}
 	}
 
@@ -901,6 +901,7 @@ function conic(func, start, end, millise, after) {
 /**
  * func - 动画函数格式: func(frame);
  *		frame - 从start~end之间的数值
+ *		如果func返回'stop'则动画函数终止并返回, after方法不会回调
  * start - 起始值
  * end - 结束值
  * millise - 耗费的时间
@@ -918,6 +919,7 @@ function anim(func, start, end, millise, after) {
 	var size = ( Math.max(start, end) - Math.min(start, end) );
 	var step = size / oftime / (millise / _1sec);
 	var f = start<end ? 1 : -1;
+	var STOP = 'stop';
 	
 	var milliseconds = function () {
 		return new Date().getTime();
@@ -937,10 +939,10 @@ function anim(func, start, end, millise, after) {
 			start += ((step * utime/oframe)*f);
 			
 			utime = milliseconds();
-			func(start);
+			if (func(start)==STOP) return;
 			setTimeout(th, 1);
 		} else {
-			func(end);
+			if (func(end)==STOP) return;
 			
 			if (typeof after=='function') {
 				after();
@@ -1091,5 +1093,27 @@ function Dialog(width, height) {
 		if (opacity) setOpacity(ediv, opacity);
 		
 		return ediv;
+	}
+}
+
+/**
+ * 为对象的事件提供链式调用, 防止新的事件覆盖老的事件处理函数
+ * 新的事件处理优先于老的事件处理
+ * @param {} obj - 标签对象
+ * @param {} eventName - 事件名
+ * @param {} newEvent - 新的事件处理函数
+ */ 
+function eventStack(obj, eventName, newEvent) {
+	if (typeof newEvent!='function') return;
+	
+	var oldEvent = obj[eventName];
+	
+	if (oldEvent) {
+		obj[eventName] = function() {
+			newEvent();
+			oldEvent();
+		}
+	} else {
+		obj[eventName] = newEvent;
 	}
 }
