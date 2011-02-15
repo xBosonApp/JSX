@@ -1,6 +1,6 @@
 ﻿// CatfoOD 2009.12.9
 // charset: UTF-8
-// v0.20
+// v0.21
 
 (function() {
 	var head = document.getElementsByTagName("head")[0];
@@ -520,7 +520,9 @@ function onMouseOverChangeColor(obj, color) {
 	var ncolor = getColorInt(color);
 	
 	obj.setBackColor = function(newcolor) {
+		var old = oldcolor;
 		oldcolor = getColorInt(newcolor);
+		return old;
 	}
 	
 	obj.onmouseover = function() {
@@ -820,6 +822,14 @@ function isopera() {
 	var name = 'jym.jsx.isopera.cache';
 	if (window[name]===undefined) {
 		window[name] = navigator.appName.indexOf('Opera')>=0;
+	}
+	return window[name];
+}
+
+function isff() {
+	var name = 'jym.jsx.isfirefox.cache';
+	if (window[name]===undefined) {
+		window[name] = navigator.userAgent.indexOf('Firefox')>=0;
 	}
 	return window[name];
 }

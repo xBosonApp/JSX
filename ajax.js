@@ -1,7 +1,7 @@
 ﻿// CatfoOD 2009.11.25
 // 依赖common.js
 // charset: UTF-8
-// v0.30
+// v0.31
 
 /**
  * 复用该对象效率更高<br>
@@ -51,6 +51,9 @@ function ajax() {
 		}
 		
 		if (m_url) {
+			if (isff()) {
+				m_async = false;
+			}
 			xmlreq.open(m_method, m_url, m_async);
 			initheader();
 		} else {
@@ -64,9 +67,6 @@ function ajax() {
 	this.open = function(url) {
 		if (url) {
 			m_url = url;
-		}
-		if (!isie()) {
-			m_async = false;
 		}
 	}
 	
@@ -93,7 +93,7 @@ function ajax() {
 		initHttpRequest();
 		if (!content) content = null;
 		xmlreq.send(content);
-	if (!isie()) {
+	if (isff()) {
 		eventheadle();
 		}
 	}
