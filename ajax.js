@@ -1,7 +1,7 @@
 ﻿// CatfoOD 2009.11.25
 // 依赖common.js
 // charset: UTF-8
-// v0.31
+// v0.32
 
 /**
  * 复用该对象效率更高<br>
@@ -39,8 +39,21 @@ function ajax() {
 		xmlreq.setRequestHeader('charset', 'utf8');
 	}
 	
+	// 修正火狐不能正确响应readyState == 4的情况
+	var __state = 1;
+	var fix_firefox_ajax = function() {
+		if (__state < xmlreq.readyState) {
+			eventheadle();
+			__state = xmlreq.readyState;
+		}
+		if (__state < 4) {
+			setTimeout(fix_firefox_ajax, 100);
+		}
+	}
+	
 	var initHttpRequest = function() {
 		if (xmlreq)	free();
+		__state = 1;
 		
 		xmlreq = creatHttpRequest();
 		if (!xmlreq) {
@@ -51,9 +64,10 @@ function ajax() {
 		}
 		
 		if (m_url) {
+		/* 使用另一种方法在FF中同步执行ajax
 			if (isff()) {
 				m_async = false;
-			}
+			} */
 			xmlreq.open(m_method, m_url, m_async);
 			initheader();
 		} else {
@@ -93,8 +107,9 @@ function ajax() {
 		initHttpRequest();
 		if (!content) content = null;
 		xmlreq.send(content);
-	if (isff()) {
-		eventheadle();
+		
+		if ((!m_async) && isff()) {
+			fix_firefox_ajax();
 		}
 	}
 	
@@ -123,6 +138,9 @@ function ajax() {
 		m_url = url;
 	}
 	
+	/**
+	 * 是否设置为异步方式,(默认是同步)
+	 */
 	this.setAsync = function(syncFlag) {
 		m_async = syncFlag;
 	}
