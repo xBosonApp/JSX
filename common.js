@@ -373,7 +373,7 @@ function showDiv(divid, aftershow) {
 	
 	div.style.display = "block";
 	anim(function(alpha) {
-		if (isie()) {
+		if (0 && isie()) {
 			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
 					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=200);";
 		} else {
@@ -392,7 +392,7 @@ function hideDiv(divid, afterhide) {
 	var strength = 1;
 	
 	anim(function(alpha) {
-		if (isie()) {
+		if (0 &&isie()) {
 			div.style.filter = "progid:DXImageTransform.Microsoft.Alpha(opacity="+alpha+") "
 					+ "progid:DXImageTransform.Microsoft.MotionBlur(Strength="+strength+",Direction=35);";
 		} else {
@@ -1023,8 +1023,8 @@ function Dialog(width, height) {
 		var bh = document.body.clientHeight;
 		var sw = document.body.scrollWidth;
 		var sh = document.body.scrollHeight;
-		hide.style.width 	= (bw>sw)?bw:sw + 'px';
-		hide.style.height	= (bh>sh)?bh:sh + 'px';
+		hide.style.width 	= (bw>sw)? bw: sw + 'px';
+		hide.style.height	= (bh>sh)? bh: sh + 'px';
 	}
 	
 	/** 显示对话框 */
@@ -1058,7 +1058,7 @@ function Dialog(width, height) {
 		// 自动调整大小
 		var bodyh = document.body.clientHeight;
 		
-		var y = ( bodyh - div.scrollHeight ) / 2 - 20;
+		var y = getCenterY(div);
 		var h = div.scrollHeight;
 		
 		div.style.top = y<0? 0 : y;
@@ -1067,6 +1067,11 @@ function Dialog(width, height) {
 	
 	this.getContentDiv = function() {
 		return div;
+	}
+	
+	function getCenterY(_tar) {
+		var bodyh = document.body.clientHeight;
+		return ( bodyh - _tar.scrollHeight ) / 2 - 20;
 	}
 	
 	function createDiv(wid, hei, color, opacity) {
