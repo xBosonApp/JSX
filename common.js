@@ -73,11 +73,15 @@ function onchange(input_tag, eventHandle) {
 			}, 500);
 		}
 		
-		var oldvalue = input_tag.value;
+		var tname = input_tag.type.toLowerCase();
+		var attrName = (tname=='checkbox' || tname.type=='radio')
+					   ? 'checked' : 'value';
+		
+		var oldvalue = input_tag[attrName];
 		handles.push(function() {
-			if (input_tag.value != oldvalue) {
+			if (input_tag[attrName] != oldvalue) {
 				eventHandle();
-				oldvalue = input_tag.value;
+				oldvalue = input_tag[attrName];
 			}
 		});
 	} else {
@@ -795,6 +799,16 @@ function getTop(obj) {
 	return p_offset;
 }
 
+function getLeft(obj) {
+	var parent = obj;
+	var p_offset = 0;
+	while(parent) {
+		p_offset += parent.offsetLeft;
+		parent = parent.parentElement;
+	}
+	return p_offset;
+}
+
 /**
  * 移动obj对象,从startx到finishx, 移动完成后调用after()
  */
@@ -1130,5 +1144,136 @@ function eventStack(obj, eventName, newEvent) {
 		}
 	} else {
 		obj[eventName] = newEvent;
+	}
+}
+
+
+/** 生成一个圆角矩形 */
+function create_round_horn(_parent) {
+	var Bcolor = '#BBBBBB';
+	var Bwidth = '2px';
+	
+	var _div = document.createElement('div');
+	_parent.appendChild(_div);
+	_div.style.display = 'none';
+	
+	/*--| 生成内容 |--*/
+	_css(5, 1); _css(3, 0); _css(2, 0);
+	_css(1, 0); _css(1, 0);
+	
+	var _cont = document.createElement('div');
+	_div.appendChild(_cont);
+	
+	_boder(_cont);
+	_cont.style.paddingLeft = '6px';
+	_cont.style.paddingRight = '6px';
+	_cont.style.backgroundColor = '#FFFFFF';
+	_cont.style.color = '#553333';
+	
+	_css(1, 0); _css(1, 0);
+	_css(2, 0); _css(3, 0); _css(5, 1); 
+	
+	/*--| 生成阴影 |--*/
+	_shadow(30, 5);_shadow(40, 5);_shadow(50, 3);_shadow(50, 2);
+	_shadow(50, 1);_shadow(50, 1);_shadow(40, 0);_shadow(30, 0);
+	_shadow(25, 0);_shadow(20, 0);_shadow(15, 0);_shadow(10, 0);
+	_shadow( 5, 0);_shadow( 3, 0);_shadow( 1, 0);
+	
+	
+	_div.onmousemove = function() {
+		var y = event.offsetY;
+		if (!y) return;
+		
+		var ctop = _div.style.pixelTop;
+		var ny = (y<15) ? ctop + y + 20 : ctop - y;
+		
+		conic(function(_y) {
+			_div.style.pixelTop = _y;
+		}, ctop, ny, 380);
+	}
+	
+	/* 返回一个可操作对象 */
+	return {
+		 'content'	: _cont
+		,'frame'	: _div
+		
+		,'setText'	: function(txt) {
+			_cont.innerHTML = txt;
+		}
+		,'setPos'	: function(x, y) {
+			_div.style.position  = 'absolute';
+			_div.style.display = "block";
+			_div.style.top  = y + 'px';
+			_div.style.left = x + 'px';
+		}
+		/* 返回宽度 */
+		,'getWidth'	: function() {
+			return _cont.offsetWidth;
+		}
+		/* 在指定的位置显示 */
+		,'show'		: function(x, y) {
+			this.setPos(x,y+40);
+			showDiv(_div);
+			conic(function(_y) {
+				_div.style.top  = _y + 'px';
+			}, y+40, y, 500);
+		}
+		/* 彻底删除,释放资源 */
+		,'release'	: function() {
+			_div.onmousemove = null;
+			var p = _div.parentNode
+			if (p) p.removeChild(_div);
+		}
+		/* 关闭这个矩形 */
+		,'close'	: function() {
+			hideDiv(_div);
+			var y = _div.offsetTop;
+			var _t = this;
+			conic(function(_y) {
+				_div.style.top = _y + 'px';
+			}, y, y+40, 500, function() {
+				_t.release();
+			});
+		}
+	};
+	
+	function _shadow(opa, _m) {
+		var _o = document.createElement('div');
+		_div.appendChild(_o);
+		
+		_o.style.backgroundColor = '#999999';
+		_o.style.overflow 		= 'hidden';
+		_o.style.height 		= '1px';
+		_o.style.position  		= 'relative';
+		setOpacity(_o, opa);
+		_margin(_o, _m+1);
+	}
+	
+	function _css(margin, _end) {
+		var _o = document.createElement('div');
+		_div.appendChild(_o);
+		
+		_margin(_o, margin);
+		_boder(_o);
+		
+		var c = parseInt(0xFF - margin * 22).toString(16);
+		_o.style.backgroundColor = '#' + c + c + c;
+		_o.style.overflow 		= 'hidden';
+		_o.style.height 		= '1px';
+		_o.style.position  		= 'relative';
+	}
+	
+	function _margin(_o, _m) {
+		_o.style.margin = '0';
+		_o.style.marginLeft  = _m + 'px';
+		_o.style.marginRight = _m + 'px';
+	}
+	
+	function _boder(_o) {
+		_o.style.borderWidth      = '0';
+		_o.style.borderColor      = Bcolor;
+		_o.style.borderStyle      = 'solid';
+		_o.style.borderLeftWidth  = Bwidth;
+		_o.style.borderRightWidth = Bwidth;
 	}
 }

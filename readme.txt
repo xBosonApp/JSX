@@ -75,6 +75,9 @@ setY(obj, y)
 
 	// 计算指定的标记对象到文档顶端的像素
 getTop(tag)
+	
+	// 计算指定的标记对象到文档左端的像素
+getLeft(tag)
 
 	// 动画化水平移动obj
 movex(obj, startx, finishx, after)
@@ -126,6 +129,9 @@ conic(func, start, end, millise, after)
 
 	// 为事件处理提供通用的栈
 eventStack(obj, eventName, newEvent)
+
+	// 生成圆角矩形, 返回的对象可以对它操作
+create_round_horn(_parent)
 	
 // ---------------------- class目录 ----------------------
 
