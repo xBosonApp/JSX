@@ -1,6 +1,6 @@
 ﻿// CatfoOD 2009.12.9
 // charset: UTF-8
-// v0.21
+// v0.23
 
 (function() {
 	var head = document.getElementsByTagName("head")[0];
@@ -55,20 +55,21 @@ function waitRes(res, whenFinish) {
 /**
  * 给表单tag绑定onchange事件,该方法不会引起问题
  * 当表单的值value放生改变时激活eventHandle,这是一个轮询的方法
- * 效率不高,而且改变后会有延迟
+ * 效率不高,而且改变后会有延迟,
+ * 返回释放内存的函数
  * @param {} input_tag
  * @param {} eventHandle
  */
 function onchange(input_tag, eventHandle) {
 	var name = 'jym.jsx.onchange.handles.cache';
-	
+
 	if (input_tag && typeof eventHandle=='function') {
 		var handles = window[name];
 		if (!handles) {
 			window[name] = handles = [];
 			setInterval(function() {
 				for (var h in handles) { 
-					handles[h]();
+					handles[h] && handles[h]();
 				}
 			}, 500);
 		}
@@ -78,12 +79,16 @@ function onchange(input_tag, eventHandle) {
 					   ? 'checked' : 'value';
 		
 		var oldvalue = input_tag[attrName];
-		handles.push(function() {
+		var idx = handles.push(function() {
 			if (input_tag[attrName] != oldvalue) {
 				eventHandle();
 				oldvalue = input_tag[attrName];
 			}
 		});
+		
+		return function() {
+			handles[idx-1] = null;
+		};
 	} else {
 		throw new Error("参数错误");
 	}
@@ -706,8 +711,8 @@ function int2color(i) {
  * 					则使用div自己触发鼠标拖动事件
  */
 function DivPack(divid, touchid) {
-	var div = document.getElementById(divid);
-	if (div==null) div = divid;
+	var div = getDiv(divid);
+	var toucher = getDiv(touchid);
 
 	var x = 0;
 	var y = 0;
@@ -715,6 +720,11 @@ function DivPack(divid, touchid) {
 	var mx = 0;
 	var my = 0;
 	var ins = this;
+	var ox = []; 
+	var oy = [];
+	var ot = [];
+	var oi = 0;
+	var SAMPLING_COUNT = 10;
 	
 	this.setX = function(nx) {
 		x = nx;
@@ -742,10 +752,41 @@ function DivPack(divid, touchid) {
 		stop = false;
 		mx = event.screenX;
 		my = event.screenY;
+		oi = 0;
+		ox[oi] = x = getLeft(div);
+		oy[oi] = y = getTop(div);
 	}
 
 	var cancelmove = function() {
 		stop = true;
+		
+		var offx = event.screenX;
+		var offy = event.screenY;
+		
+		/* 惯性算法 */
+		var ct = new Date().getTime();
+		var ooi = null;
+		var tmp = oi + 1;
+
+		for (var c=0; c<SAMPLING_COUNT; ++c) {
+			if (tmp>SAMPLING_COUNT) tmp = 0;
+			if (ct - ot[tmp]<500 && ct - ot[tmp]>10) {
+				ooi = tmp;
+				break;
+			}
+			tmp++;
+		}
+		
+		if (ooi) {
+			var tx = offx - ox[ooi];
+			var ty = offy - oy[ooi];
+			if (tx && ty) {
+				var cx = ins.getX() + offx - mx;
+				var cy = ins.getY() + offy - my;
+				movex(div, cx, cx + tx);
+				movey(div, cy, cy + ty);
+			}
+		}
 	}
 
 	var mousemove = function () {
@@ -754,30 +795,41 @@ function DivPack(divid, touchid) {
 		var offx = event.screenX;
 		var offy = event.screenY;
 		
-		ins.setX( ins.getX()+offx-mx );
-		ins.setY( ins.getY()+offy-my );
-
+		ins.setX( ins.getX() + offx - mx);
+		ins.setY( ins.getY() + offy - my);
+		
 		mx = offx;
 		my = offy;
+		
+		/* 惯性 */
+		ox[oi] = offx;
+		oy[oi] = offy;
+		ot[oi] = new Date().getTime();
+		if (++oi>=SAMPLING_COUNT) oi = 0;
 	}
 	
+	var old_handle = null;
+	
 	if (touchid) {
-		var toucher = document.getElementById(touchid);
-		if (toucher==null) {
-			toucher = div;
-		}
 		toucher.onmousedown = divmove;
 		toucher.onmouseup = cancelmove;
 		
-		var old_handle = document.onmousemove;
-		if (!old_handle) old_handle = function(){};
+		old_handle = document.onmousemove;
 		
 		document.onmousemove = function() {
 			mousemove();
-			old_handle();
+			old_handle && old_handle();
 		}
 		
 		div.style.position = "absolute";
+	}
+	
+	this.free = function() {
+		if (toucher) {
+			toucher.onmousedown = null;
+			toucher.onmouseup = null;
+			document.onmousemove = old_handle;
+		}
 	}
 }
 
@@ -1106,7 +1158,7 @@ function Dialog(width, height) {
 		insertDom(document.body, ediv);
 		
 		if (!isie()) {
-			ediv.style.overflow 	= 'hidden';
+			ediv.style.overflow = 'hidden';
 			
 			ediv.onclick = function() {
 				ediv.style.height = '0px';
@@ -1152,6 +1204,7 @@ function eventStack(obj, eventName, newEvent) {
 function create_round_horn(_parent) {
 	var Bcolor = '#BBBBBB';
 	var Bwidth = '2px';
+	var do_not_move = false;
 	
 	var _div = document.createElement('div');
 	_parent.appendChild(_div);
@@ -1181,22 +1234,27 @@ function create_round_horn(_parent) {
 	
 	
 	_div.onmousemove = function() {
-		var y = event.offsetY;
+		if (do_not_move) return;
+		var y = event.offsetY; // firefox无效
 		if (!y) return;
 		
 		var ctop = _div.style.pixelTop;
-		var ny = (y<15) ? ctop + y + 20 : ctop - y;
+		var ny = (y<10) ? ctop + y + 20 : ctop - y - 10;
 		
 		conic(function(_y) {
 			_div.style.pixelTop = _y;
 		}, ctop, ny, 380);
 	}
 	
+	
 	/* 返回一个可操作对象 */
 	return {
 		 'content'	: _cont
 		,'frame'	: _div
-		
+		/* 设置是否允许鼠标停留自动移动 */
+		,'autoMove'	: function(bool) {
+			do_not_move = !bool;
+		}
 		,'setText'	: function(txt) {
 			_cont.innerHTML = txt;
 		}
