@@ -132,6 +132,14 @@ eventStack(obj, eventName, newEvent)
 
 	// 生成圆角矩形, 返回的对象可以对它操作
 create_round_horn(_parent)
+
+	// 生成样式编辑器, 返回的对象可以对它操作
+createCssDialog(_parent, _initValue, _objArrs)
+	show()		显示
+	close()		关闭并释放资源
+	objArrays	标签数组是_objArrs参数
+	listener()	加入事件监听器
+	addTag()	插入新的标签
 	
 // ---------------------- class目录 ----------------------
 

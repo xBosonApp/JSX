@@ -1,6 +1,7 @@
 /* CSS 样式选择控件
  * 依赖common.js */
-
+(function() {
+	
 /** create tag */
 function cc(name, _parent) {
 	var _tag = document.createElement(name);
@@ -15,6 +16,8 @@ function chref(text, _parent) {
 	href.style.marginLeft = '5px';
 	return href;
 }
+
+var _ie = navigator.appName.search('Microsoft')>=0;
 
 var css_color_list = {
 	'黑色' : '#000000',	'白色' : '#FFFFFF', '鸨色' : '#f7acbc',
@@ -58,6 +61,17 @@ var css_align_type = {
 	'两端对齐'	: 'justify'
 };
 
+var css_shadow_type = {
+//	name : [css3, ie]
+	 '无阴影'		: (!_ie ? '' 					: 'Strength=0, Direction=0, Color=#888888')
+	,'下45度硬边'	: (!_ie ? ' 3px  3px #888' 		: 'Strength=8, Direction=135, Color=#888888')
+	,'下45度模糊'	: (!_ie ? ' 3px  3px 5px #888'	: 'Strength=4, Direction=135, color=#888888')
+	,'上45度硬边'	: (!_ie ? '-3px -3px #888'		: 'Strength=8, Direction=-45, Color=#888888')
+	,'上45度模糊'	: (!_ie ? '-3px -3px 5px #888'	: 'Strength=4, Direction=-45, Color=#888888')
+	,'四边轻'		: (!_ie ? ' 0   0   5px #888'	: 'Strength=4, Direction=180, Color=#888888')
+	,'四边重'		: (!_ie ? ' 0   0 5px 5px #888'	: 'Strength=8, Direction=180, Color=#888888')
+};
+
 var css_dialog_struct = [
 /*	[name, css, type, {name:value,...}]
  *  type::	's' -> select
@@ -69,6 +83,9 @@ var css_dialog_struct = [
 	,['字体大小',	'fontSize',			'n', {'min': 5, 'max':40}	]
 	,['字间距',		'letterSpacing',	'n', {'min': 0, 'max':20}	]
 	,['对齐方式',	'textAlign',		's', css_align_type			]
+	,[null]
+	,['透明度',		'opacity',			'n', {'min': 1, 'max':100}	]
+	,['阴影样式',	'boxShadow',		's', css_shadow_type		]
 	,[null]
 	,['边框样式',	'borderStyle',		's', css_border_style		]
 	,['边框宽度',	'borderWidth',		'n', {'min':0 , 'max':50}	]
@@ -94,7 +111,11 @@ var css_default_values = {
 	,'width'			: ''
 	,'height'			: ''
 	,'textAlign'		: 'left'
+	,'opacity'			: ''
+	,'boxShadow'		: ''
 }
+
+var CSS_DEFAULT_VAL = '';
 
 /**
  * 创建对话框的方法,返回的对象不可以复用
@@ -125,7 +146,9 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	/** 用来保存释放内存的过程 */
 	var _frees = [];
 	var _width = 300;
+	/** 事件监听器 */
 	var _listeners = [];
+	var closed = false;
 	
 	/** 创建主框架 */
 	var rh = create_round_horn(_parent);
@@ -138,6 +161,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	/** 创建内容元素 */
 	var table = cc('table', rh.content);
 	table.style.width = (_width-30) + "px";
+	table.style.border = '0';
 	var tbody = cc('tbody', table);
 	
 	var tmp = css_dialog_struct.length;
@@ -176,10 +200,10 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	
 	var ok = chref('确定', td);
 	ok.onclick = function() {
-		_sendEvent('ok');
 		for (var i in modifyValue) {
 			_initValue[i] = modifyValue[i]; 
 		}
+		_sendEvent('ok');
 		_close();
 	}
 	
@@ -287,6 +311,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	function createSelect(_title_name) {
 		var td = createTSc(_title_name);
 		var select = cc('select', td);
+		select.style.width = '100px';
 		return select;
 	}
 	
@@ -294,6 +319,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 		var tr = cc('tr', tbody);
 		var th = cc('th', tr);
 		th.innerHTML = _title_name;
+		th.style.width = '40%';
 		var td = cc('td', tr);
 		return td;
 	}
@@ -303,9 +329,11 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 		for (var i in _objArrs) {
 			if (i!='length' && _objArrs[i] && _objArrs[i].style) {
 				try {
-					_objArrs[i].style[_name] = _value;
+					_changeStyle(_objArrs[i], _name, _value);
 				} catch (e) {
-					_input && (_input.value = '');
+					_input && (_input.value = CSS_DEFAULT_VAL);
+					_value = CSS_DEFAULT_VAL;
+					break;
 				}
 			}
 		}
@@ -325,6 +353,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	}
 	
 	function _show(_x, _y) {
+		if (closed) return;
 		_sendEvent('show');
 		if (!_x) _x = (document.body.clientWidth - 300)/2;
 		if (!_y) _y = 150;
@@ -332,6 +361,9 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	}
 	
 	function _close() {
+		if (closed) return;
+		closed = true;
+		
 		_sendEvent('close');
 		rh.close();
 		move.free();
@@ -364,6 +396,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	 * @param {} eventStr
 	 */
 	function _sendEvent(eventStr) {
+		if (closed) return;
 		for (var i=_listeners.length-1; i>=0; i--) {
 			_listeners[i](eventStr);
 		}
@@ -377,3 +410,46 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 		,'addTag'	: _addTag
 	};
 }
+
+/**
+ * 修改_tagArr中所有的tag对象的样式为_styleArr中的值
+ */
+function changeStylesWithArr(_tagArr, _styleArr) {
+	for (var tag in _tagArr) {
+		if (tag != 'length' && _tagArr[tag] && _tagArr[tag].style) {
+			for (var style in _styleArr) {
+				if (style != 'length' && _styleArr[style]) {
+					try {
+						_changeStyle(_tagArr[tag], style, _styleArr[style]);
+					} catch (e) {
+					}
+				}
+			}
+		}
+	}
+}
+
+/** 通常是: [_tag].style.[_sname] = _svalue, 
+ *  如果有特殊的属性, 需要单独设计算法
+ *  失败会抛出异常 */
+function _changeStyle(_tag, _sname, _svalue) {
+	if (_sname=='boxShadow') {
+		if (_ie) {
+			_tag.style.filter = "progid:DXImageTransform.Microsoft.Shadow" +
+								"(" + _svalue + ");";
+		} else {
+			_tag.style.boxShadow = _svalue;
+		}
+		
+	} else if (_sname=='opacity') {
+		setOpacity(_tag, _svalue);
+		
+	} else {
+		_tag.style[_sname] = _svalue;
+	}
+}
+
+/** 导出函数 */
+window.createCssDialog		= createCssDialog;
+window.changeStylesWithArr	= changeStylesWithArr;
+})();
