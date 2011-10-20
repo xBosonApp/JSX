@@ -813,6 +813,7 @@ function DivPack(divid, touchid) {
 	if (touchid) {
 		toucher.onmousedown = divmove;
 		toucher.onmouseup = cancelmove;
+		//toucher.onmouseout = cancelmove;
 		
 		old_handle = document.onmousemove;
 		
@@ -1179,7 +1180,7 @@ function Dialog(width, height) {
 
 /**
  * 为对象的事件提供链式调用, 防止新的事件覆盖老的事件处理函数
- * 新的事件处理优先于老的事件处理
+ * 新的事件处理优先于老的事件处理;返回释放事件句柄的函数
  * @param {} obj - 标签对象
  * @param {} eventName - 事件名
  * @param {} newEvent - 新的事件处理函数
@@ -1197,6 +1198,10 @@ function eventStack(obj, eventName, newEvent) {
 	} else {
 		obj[eventName] = newEvent;
 	}
+	
+	return function() {
+		obj[eventName] = oldEvent;
+	}
 }
 
 
@@ -1209,6 +1214,7 @@ function create_round_horn(_parent) {
 	var _div = document.createElement('div');
 	_parent.appendChild(_div);
 	_div.style.display = 'none';
+	_div.style.zIndex = 10;
 	
 	/*--| 生成内容 |--*/
 	_css(5, 1); _css(3, 0); _css(2, 0);

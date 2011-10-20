@@ -40,7 +40,8 @@ var css_color_list = {
 	'银鼠' : '#a1a3a6', '铅色' : '#72777b', '黒铁' : '#281f1d',
 	'江戸紫' : '#6f599c', '葡萄鼠' : '#63434f', '茄子绀' : '#45224a',
 	'菖蒲色' : '#c77eb5', '牡丹色' : '#ea66a6', '石竹色' : '#d1c7b7',
-	'象牙色' : '#f2eada', '薄墨色' : '#74787c', '煤竹色' : '#6c4c49'
+	'象牙色' : '#f2eada', '薄墨色' : '#74787c', '煤竹色' : '#6c4c49',
+	'无色' : ''
 };
 
 var css_border_style = {
@@ -61,15 +62,22 @@ var css_align_type = {
 	'两端对齐'	: 'justify'
 };
 
+var css_font_weight = {
+	'正常'		: 'normal',
+	'细体'		: 'lighter',
+	'粗体'		: 'bold',
+	'特粗体'		: 'bolder'
+}
+
 var css_shadow_type = {
 //	name : [css3, ie]
-	 '无阴影'		: (!_ie ? '' 					: 'Strength=0, Direction=0, Color=#888888')
+	 '无阴影'		: (!_ie ? '' 					: 'Strength=0, Direction=  0, Color=#888888')
 	,'下45度硬边'	: (!_ie ? ' 3px  3px #888' 		: 'Strength=8, Direction=135, Color=#888888')
 	,'下45度模糊'	: (!_ie ? ' 3px  3px 5px #888'	: 'Strength=4, Direction=135, color=#888888')
 	,'上45度硬边'	: (!_ie ? '-3px -3px #888'		: 'Strength=8, Direction=-45, Color=#888888')
 	,'上45度模糊'	: (!_ie ? '-3px -3px 5px #888'	: 'Strength=4, Direction=-45, Color=#888888')
-	,'四边轻'		: (!_ie ? ' 0   0   5px #888'	: 'Strength=4, Direction=180, Color=#888888')
-	,'四边重'		: (!_ie ? ' 0   0 5px 5px #888'	: 'Strength=8, Direction=180, Color=#888888')
+	,'四边轻'		: (!_ie ? ' 0 0  5px #888'		: 'Strength=4, Direction=180, Color=#888888')
+	,'四边重'		: (!_ie ? ' 0 0  5px 5px #888'	: 'Strength=8, Direction=180, Color=#888888')
 };
 
 var css_dialog_struct = [
@@ -82,6 +90,7 @@ var css_dialog_struct = [
 	,['字体色',		'color', 			'c', css_color_list			]
 	,['字体大小',	'fontSize',			'n', {'min': 5, 'max':40}	]
 	,['字间距',		'letterSpacing',	'n', {'min': 0, 'max':20}	]
+	,['字粗细',		'fontWeight',		's', css_font_weight		]
 	,['对齐方式',	'textAlign',		's', css_align_type			]
 	,[null]
 	,['透明度',		'opacity',			'n', {'min': 1, 'max':100}	]
@@ -136,7 +145,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	for (var i in css_dialog_struct) {
 		if (css_dialog_struct[i] && css_dialog_struct[i][1]) {
 			var name = css_dialog_struct[i][1];
-			if (!_initValue[name]) {
+			if ( typeof _initValue[name] != 'string' ) {
 				_initValue[name] = css_default_values[name];	
 			}
 			modifyValue[name] = _initValue[name];
@@ -245,10 +254,11 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 			option.value = color_list[cl];
 			option.style.backgroundColor = color_list[cl];
 			
-			if (color_list[cl]!='#FFFFFF') // 低效 
+			if (cl!='白色' && cl!='无色') {// 低效 
 				option.style.color = '#FFFFFF';
+			}
 			option.innerHTML = cl;
-			
+
 			if (_initValue[_arr[1]]==color_list[cl]) {
 				option.selected = true;
 			}
@@ -396,7 +406,7 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 	 * @param {} eventStr
 	 */
 	function _sendEvent(eventStr) {
-		if (closed) return;
+		if (!_listeners) return;
 		for (var i=_listeners.length-1; i>=0; i--) {
 			_listeners[i](eventStr);
 		}
@@ -429,20 +439,42 @@ function changeStylesWithArr(_tagArr, _styleArr) {
 	}
 }
 
+function _change_IE_Filter(_tag, _key, _value) {
+	var FIELD_NAME = '_ie_filter_cache';
+
+	if (!_tag[FIELD_NAME]) {
+		_tag[FIELD_NAME] = {};
+	}
+	
+	var _cache = _tag[FIELD_NAME];
+	_cache[_key] = _value;
+	
+	var filters = [];
+	for (var k in _cache) {
+		filters.push(_cache[k]);
+	}
+
+	_tag.style.filter = filters.join(' ');
+}
+
 /** 通常是: [_tag].style.[_sname] = _svalue, 
  *  如果有特殊的属性, 需要单独设计算法
  *  失败会抛出异常 */
 function _changeStyle(_tag, _sname, _svalue) {
 	if (_sname=='boxShadow') {
 		if (_ie) {
-			_tag.style.filter = "progid:DXImageTransform.Microsoft.Shadow" +
-								"(" + _svalue + ");";
+			_change_IE_Filter(_tag, _sname, "progid:DXImageTransform.Microsoft.Shadow" +
+											"(" + _svalue + ")");
 		} else {
 			_tag.style.boxShadow = _svalue;
 		}
 		
 	} else if (_sname=='opacity') {
-		setOpacity(_tag, _svalue);
+		if (_ie) {
+			_change_IE_Filter(_tag, _sname, 'alpha(opacity='+_svalue+')');
+		} else {
+			_tag.style.opacity = _svalue/100;
+		}
 		
 	} else {
 		_tag.style[_sname] = _svalue;
