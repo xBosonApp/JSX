@@ -725,6 +725,7 @@ function DivPack(divid, touchid) {
 	var ot = [];
 	var oi = 0;
 	var SAMPLING_COUNT = 10;
+	var inertia = true;
 	
 	this.setX = function(nx) {
 		x = nx;
@@ -748,21 +749,29 @@ function DivPack(divid, touchid) {
 		return div;
 	}
 	
+	/** 是否需要惯性动画 */
+	this.setInertia = function(_bool) {
+		inertia = _bool;
+	}
+	
 	var divmove = function() {
+		_triggerEvent('startmove');
 		stop = false;
 		mx = event.screenX;
 		my = event.screenY;
 		oi = 0;
-		ox[oi] = x = getLeft(div);
-		oy[oi] = y = getTop(div);
+		ox[oi] = x ;//= getLeft(div); 会导致错误
+		oy[oi] = y ;//= getTop(div);
 	}
 
 	var cancelmove = function() {
+		_triggerEvent('moveover');
 		stop = true;
 		
 		var offx = event.screenX;
 		var offy = event.screenY;
 		
+		if (!inertia) return;
 		/* 惯性算法 */
 		var ct = new Date().getTime();
 		var ooi = null;
@@ -783,8 +792,8 @@ function DivPack(divid, touchid) {
 			if (tx && ty) {
 				var cx = ins.getX() + offx - mx;
 				var cy = ins.getY() + offy - my;
-				movex(div, cx, cx + tx);
-				movey(div, cy, cy + ty);
+				movex(div, cx, cx + tx, function() {ins.setX(cx + tx)} );
+				movey(div, cy, cy + ty, function() {ins.setY(cy + ty)} );
 			}
 		}
 	}
@@ -801,6 +810,7 @@ function DivPack(divid, touchid) {
 		mx = offx;
 		my = offy;
 		
+		if (!inertia) return;
 		/* 惯性 */
 		ox[oi] = offx;
 		oy[oi] = offy;
@@ -808,29 +818,47 @@ function DivPack(divid, touchid) {
 		if (++oi>=SAMPLING_COUNT) oi = 0;
 	}
 	
-	var old_handle = null;
+	var old_handle = [];
 	
 	if (touchid) {
 		toucher.onmousedown = divmove;
 		toucher.onmouseup = cancelmove;
-		//toucher.onmouseout = cancelmove;
-		
-		old_handle = document.onmousemove;
-		
-		document.onmousemove = function() {
-			mousemove();
-			old_handle && old_handle();
-		}
+		old_handle[0] = eventStack(document, 'onmousemove', mousemove);
+		old_handle[1] = eventStack(document, 'onscroll', cancelmove);
+		old_handle[2] = eventStack(document.body, 'onscroll', cancelmove);
 		
 		div.style.position = "absolute";
+	}
+	
+	var _eventListener = {};
+	
+	function _triggerEvent(name) {
+		if (_eventListener[name]) {
+			_eventListener[name]();
+		}
+	}
+	
+	/** 每个事件类型只支持一个监听器,老的被返回
+	 * 事件类型:moveover, startmove */
+	this.event = function(name, handle) {
+		var _old = _eventListener[name];
+		_eventListener[name] = handle;
+		return _old;
 	}
 	
 	this.free = function() {
 		if (toucher) {
 			toucher.onmousedown = null;
 			toucher.onmouseup = null;
-			document.onmousemove = old_handle;
+			toucher.onmouseout = null;
+			document.body.onscroll = null; 
+			document.onscroll = null;
+			old_handle[0]();
+			old_handle[1]();
+			old_handle[2]();
 		}
+		_eventListener = null;
+		old_handle = null;
 	}
 }
 

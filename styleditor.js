@@ -367,6 +367,8 @@ function createCssDialog(_parent, _initValue, _objArrs) {
 		_sendEvent('show');
 		if (!_x) _x = (document.body.clientWidth - 300)/2;
 		if (!_y) _y = 150;
+		move.setX(_x);
+		move.setY(_y);
 		rh.show(_x, _y);
 	}
 	

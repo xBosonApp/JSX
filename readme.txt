@@ -154,6 +154,8 @@ DivPack(divid, touchid)
 	getX()
 	getY()
 	getDiv()
+	setInertia(bool)
+	event(name, handle)
 	
 Parabola(x1, x2, y)
 	get(x)
